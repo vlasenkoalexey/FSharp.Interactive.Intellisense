@@ -1,0 +1,10 @@
+# git ignore file
+*.dll
+*.exe
+*.pdb
+*.suo
+*.csproj.user
+*.mdf
+*.ldf
+bin/
+obj/

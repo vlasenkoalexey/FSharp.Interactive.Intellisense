@@ -7,6 +7,11 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
+using Microsoft.VisualStudio.Shell;
+using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+using System.Reflection;
+
+
 namespace FSharp.Interactive.Intellisense
 {
     internal class FSharpCompletionSource : ICompletionSource
@@ -20,6 +25,29 @@ namespace FSharp.Interactive.Intellisense
         {
             m_sourceProvider = sourceProvider;
             m_textBuffer = textBuffer;
+
+            Assembly fsiAssembly = Assembly.Load("FSharp.VS.FSI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            Type fsiLanguageServiceType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.FsiLanguageService");
+
+            var providerGlobal = (IOleServiceProvider)Package.GetGlobalService(typeof(IOleServiceProvider));
+            var provider = new ServiceProvider(providerGlobal);
+            dynamic fsiLanguageService = ExposedObject.From(provider.GetService(fsiLanguageServiceType));
+            dynamic sessions = fsiLanguageService.sessions;
+            dynamic sessionsValue = ExposedObject.From(sessions).Value;
+            dynamic sessionR = ExposedObject.From(sessionsValue).sessionR;
+            dynamic sessionRValue = ExposedObject.From(sessionR).Value;
+            dynamic sessionRValueValue = ExposedObject.From(sessionRValue).Value;
+            dynamic fsharpInteractiveService = ExposedObject.From(sessionRValueValue).client;
+            //fsharpInteractiveService.Interrupt();
+
+            //((Microsoft.VisualStudio.FSharp.Interactive.Session.createSessions@391-5)(sessions.Value)).sessionR.Value.Value
+
+            // TODO: figure out how to execute some script in F# interactive programatically
+            // TODO: figure out how FSI interactive service (server) is instantiated
+            // TODO: figure out how FSI interactive service (client) is used
+            // TODO: download VS FSI sources
+
+            
         }
 
         void ICompletionSource.AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)

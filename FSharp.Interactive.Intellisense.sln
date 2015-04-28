@@ -5,7 +5,7 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSharp.Interactive.Intellisense", "FSharp.Interactive.Intellisense\FSharp.Interactive.Intellisense.csproj", "{6C599DED-3D3D-4EBC-8607-0B9529323271}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharp.Interactive.Intellisence.Lib", "FSharp.Interactive.Intellisence.Lib\FSharp.Interactive.Intellisence.Lib.fsproj", "{0D841E3A-9F5E-4882-A95A-6ACF08BDE08A}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharp.Interactive.Intellisense.Lib", "FSharp.Interactive.Intellisence.Lib\FSharp.Interactive.Intellisense.Lib.fsproj", "{0D841E3A-9F5E-4882-A95A-6ACF08BDE08A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

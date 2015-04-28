@@ -5,7 +5,7 @@
 open System
 open System.Collections.Generic
 open System.Reflection
-//open FSharp.Interactive.Intellisence.Lib
+//open FSharp.Interactive.Intellisense.Lib
 
 // Define your library scripting code here
 

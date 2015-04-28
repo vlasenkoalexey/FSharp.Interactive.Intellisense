@@ -105,7 +105,8 @@ namespace FSharp.Interactive.Intellisense
 
             String statement = applicableTo1.GetText(applicableTo1.TextBuffer.CurrentSnapshot);
 
-            IEnumerable<String> completions = GetSuggestionsForType(statement);
+            IEnumerable<String> completions = Lib.AutocompleteProvider.getCompletions(statement);
+            //IEnumerable<String> completions = GetSuggestionsForType(statement);
 
             //List<string> strList = new List<string>();
             //strList.Add("addition");

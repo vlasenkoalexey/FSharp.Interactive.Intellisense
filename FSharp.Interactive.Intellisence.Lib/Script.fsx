@@ -9,19 +9,6 @@ open System.Reflection
 
 // Define your library scripting code here
 
-let getTypeCompletionsForAssembly(statement:String, assembly:Assembly) : IEnumerable<String> =
-    let assemblyTypeNames = assembly.GetTypes()
-                                |> Seq.filter(fun t -> t.IsPublic)
-                                |> Seq.map (fun t -> if t.FullName.LastIndexOf('`') > 0 then t.FullName.Remove(t.FullName.LastIndexOf('`')) else t.FullName) 
-                                |> Seq.filter(fun t -> t.StartsWith(statement)) 
-                                |> Seq.distinct
-    assemblyTypeNames
-
-let removePropertyPrefix (memberName:String) =
-    if memberName.StartsWith("get_") || memberName.StartsWith("set_") then 
-        memberName.Remove(0, "get_".Length)
-    else
-        memberName
 
 let getLastSegment (statement:String, line:String) = 
     let lastStatmentDotIndex = statement.LastIndexOf('.')
@@ -31,11 +18,26 @@ let getLastSegment (statement:String, line:String) =
     else
         line.Substring(lastStatmentDotIndex + 1)
 
+let getTypeCompletionsForAssembly(statement:String, assembly:Assembly) : IEnumerable<String> =
+    let assemblyTypeNames = assembly.GetTypes()
+                                |> Seq.filter(fun t -> t.IsPublic)
+                                |> Seq.map (fun t -> if t.FullName.LastIndexOf('`') > 0 then t.FullName.Remove(t.FullName.LastIndexOf('`')) else t.FullName) 
+                                |> Seq.filter(fun t -> t.StartsWith(statement))
+                                |> Seq.map(fun n -> getLastSegment(statement, n))
+                                |> Seq.distinct
+    assemblyTypeNames
+
+let removePropertyPrefix (memberName:String) =
+    if memberName.StartsWith("get_") || memberName.StartsWith("set_") then 
+        memberName.Remove(0, "get_".Length)
+    else
+        memberName
+
 let getCompletions(statement:String) : IEnumerable<String> =
     seq {
         let systemAssembly = Assembly.GetAssembly(typeof<Object>)
         let systemAssemblyTypeNames = getTypeCompletionsForAssembly(statement, systemAssembly) 
-                                        |> Seq.map(fun n -> getLastSegment(statement, n))
+                                            
         yield! systemAssemblyTypeNames
 
         if statement.LastIndexOf('.') > 0 then

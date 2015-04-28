@@ -9,11 +9,20 @@ module AutocompleteProvider =
 
     // Define your library scripting code here
 
+    let getLastSegment (statement:String, line:String) = 
+        let lastStatmentDotIndex = statement.LastIndexOf('.')
+        let nextDotIndex = line.IndexOf('.', lastStatmentDotIndex + 1)
+        if nextDotIndex > 0 then
+            line.Substring(lastStatmentDotIndex + 1, nextDotIndex - (lastStatmentDotIndex + 1))
+        else
+            line.Substring(lastStatmentDotIndex + 1)
+
     let getTypeCompletionsForAssembly(statement:String, assembly:Assembly) : IEnumerable<String> =
         let assemblyTypeNames = assembly.GetTypes()
                                     |> Seq.filter(fun t -> t.IsPublic)
                                     |> Seq.map (fun t -> if t.FullName.LastIndexOf('`') > 0 then t.FullName.Remove(t.FullName.LastIndexOf('`')) else t.FullName) 
-                                    |> Seq.filter(fun t -> t.StartsWith(statement)) 
+                                    |> Seq.filter(fun t -> t.StartsWith(statement))
+                                    |> Seq.map(fun n -> getLastSegment(statement, n))
                                     |> Seq.distinct
         assemblyTypeNames
 
@@ -23,19 +32,11 @@ module AutocompleteProvider =
         else
             memberName
 
-    let getLastSegment (statement:String, line:String) = 
-        let lastStatmentDotIndex = statement.LastIndexOf('.')
-        let nextDotIndex = line.IndexOf('.', lastStatmentDotIndex + 1)
-        if nextDotIndex > 0 then
-            line.Substring(lastStatmentDotIndex + 1, nextDotIndex - (lastStatmentDotIndex + 1))
-        else
-            line.Substring(lastStatmentDotIndex + 1)
-
     let getCompletions(statement:String) : IEnumerable<String> =
         seq {
             let systemAssembly = Assembly.GetAssembly(typeof<Object>)
             let systemAssemblyTypeNames = getTypeCompletionsForAssembly(statement, systemAssembly) 
-                                            |> Seq.map(fun n -> getLastSegment(statement, n))
+                                            
             yield! systemAssemblyTypeNames
 
             if statement.LastIndexOf('.') > 0 then

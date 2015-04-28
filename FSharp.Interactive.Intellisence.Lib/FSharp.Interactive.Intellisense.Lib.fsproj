@@ -11,7 +11,7 @@
     <AssemblyName>FSharp.Interactive.Intellisence.Lib</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
-    <Name>FSharp.Interactive.Intellisence.Lib</Name>
+    <Name>FSharp.Interactive.Intellisense.Lib</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Library1.fs" />
     <None Include="Script.fsx" />
+    <Compile Include="AutocompleteProvider.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

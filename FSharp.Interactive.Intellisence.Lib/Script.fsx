@@ -103,10 +103,12 @@ let getCompletionsForTypes(statement:String) : IEnumerable<String> = seq {
             yield! assemblyTypeNames
 
             if statement.LastIndexOf('.') > 0 then
-                let type_ = assembly.GetType(statement.Remove(statement.LastIndexOf('.')))
+                let typeName = statement.Remove(statement.LastIndexOf('.'))
+                let type_ = assembly.GetType(typeName)
                 if not(type_ = null) then
                     let memberNames = type_.GetMembers(BindingFlags.Instance ||| BindingFlags.Static ||| BindingFlags.FlattenHierarchy ||| BindingFlags.Public)
                                         |> Seq.map(fun m -> removePropertyPrefix m.Name)
+                                        |> Seq.filter (fun name -> name.StartsWith(getLastSegment(statement, typeName + "." + name))) // <- bug here
                                         |> Seq.distinct
                     yield! memberNames
 }
@@ -121,7 +123,8 @@ let getCompletions(statement:String) : IEnumerable<String> =
     } 
     |> Seq.distinct
 
-getCompletions("f") |> Seq.toList
+getCompletions("System.Console.Rea") |> Seq.toList // <- todo fix filtering by method name
+// todo : remove add_ and remove_ prefixes
 
 
 

@@ -9,6 +9,14 @@ open System.Reflection
 
 // Define your library scripting code here
 
+let getLastPartialSegment (statement:String) = 
+    let lastStatmentDotIndex = statement.LastIndexOf('.')
+    if lastStatmentDotIndex > 0 then
+        statement.Substring(lastStatmentDotIndex + 1)
+    else
+        statement
+
+getLastPartialSegment("System.Console.Rea") 
 
 let getLastSegment (statement:String, line:String) = 
     let lastStatmentDotIndex = statement.LastIndexOf('.')
@@ -27,11 +35,23 @@ let getTypeCompletionsForAssembly(statement:String, assembly:Assembly) : IEnumer
                                 |> Seq.distinct
     assemblyTypeNames
 
-let removePropertyPrefix (memberName:String) =
-    if memberName.StartsWith("get_") || memberName.StartsWith("set_") then 
-        memberName.Remove(0, "get_".Length)
-    else
-        memberName
+let prefixesToRemoveRegex = ["get_"; "set_"; "add_"; "remove_"];
+let rec removePropertyPrefixRec (memberName:String) (prefixesToRemoveRegex:String list) =
+    match prefixesToRemoveRegex with
+    | head::tail -> if (memberName.StartsWith(head)) then memberName.Remove(0, head.Length) else removePropertyPrefixRec memberName tail
+    | _ -> memberName
+//    if memberName.StartsWith("get_") || memberName.StartsWith("set_") then 
+//        memberName.Remove(0, "get_".Length)
+//    else
+//        if memberName.StartsWith("get_") || memberName.StartsWith("set_") then 
+//        memberName.Remove(0, "get_".Length)
+//
+//
+//        memberName
+
+let removePropertyPrefix (memberName:String) = removePropertyPrefixRec memberName prefixesToRemoveRegex
+
+removePropertyPrefix "get_name";
 
 let fsiAssembly = 
     System.AppDomain.CurrentDomain.GetAssemblies() 
@@ -54,7 +74,7 @@ fsiAssembly.GetReferencedAssemblies()
 open FSharp.Data;
 
 type Rss = XmlProvider<"https://www.torrentz.com/feed?f=trailer">
-let feed = Rss.Load("https://www.torrentz.com/feed?f=%D0%BF%D0%BE%D0%B1%D0%B5%D0%B3")
+//let feed = Rss.Load("https://www.torrentz.com/feed?f=%D0%BF%D0%BE%D0%B1%D0%B5%D0%B3")
 
 let getVariableNames() =
     fsiAssembly.GetTypes()//FSI types have the name pattern FSI_####, where #### is the order in which they were created
@@ -108,7 +128,7 @@ let getCompletionsForTypes(statement:String) : IEnumerable<String> = seq {
                 if not(type_ = null) then
                     let memberNames = type_.GetMembers(BindingFlags.Instance ||| BindingFlags.Static ||| BindingFlags.FlattenHierarchy ||| BindingFlags.Public)
                                         |> Seq.map(fun m -> removePropertyPrefix m.Name)
-                                        |> Seq.filter (fun name -> name.StartsWith(getLastSegment(statement, typeName + "." + name))) // <- bug here
+                                        |> Seq.filter (fun name -> name.StartsWith(getLastPartialSegment(statement))) 
                                         |> Seq.distinct
                     yield! memberNames
 }
@@ -123,7 +143,7 @@ let getCompletions(statement:String) : IEnumerable<String> =
     } 
     |> Seq.distinct
 
-getCompletions("System.Console.Rea") |> Seq.toList // <- todo fix filtering by method name
+getCompletions("System.Console.") |> Seq.toList // <- todo fix filtering by method name
 // todo : remove add_ and remove_ prefixes
 
 

@@ -9,6 +9,13 @@ open System.Reflection
 
 // Define your library scripting code here
 
+#r @"C:\Projects\TorrentRT\packages\FSharp.Data.2.1.1\lib\net40\FSharp.Data.dll";;
+open FSharp.Data;
+
+type Rss = XmlProvider<"https://www.torrentz.com/feed?f=trailer">
+//let feed = Rss.Load("https://www.torrentz.com/feed?f=%D0%BF%D0%BE%D0%B1%D0%B5%D0%B3")
+
+
 let getLastPartialSegment (statement:String) = 
     let lastStatmentDotIndex = statement.LastIndexOf('.')
     if lastStatmentDotIndex > 0 then
@@ -70,11 +77,6 @@ fsiAssembly.GetReferencedAssemblies()
 ////|> Seq.filter(fun n -> n.ToLowerInvariant().Contains("dll"))
 |> Seq.toList
 
-#r @"C:\Projects\TorrentRT\packages\FSharp.Data.2.1.1\lib\net40\FSharp.Data.dll";;
-open FSharp.Data;
-
-type Rss = XmlProvider<"https://www.torrentz.com/feed?f=trailer">
-//let feed = Rss.Load("https://www.torrentz.com/feed?f=%D0%BF%D0%BE%D0%B1%D0%B5%D0%B3")
 
 let getVariableNames() =
     fsiAssembly.GetTypes()//FSI types have the name pattern FSI_####, where #### is the order in which they were created
@@ -143,9 +145,6 @@ let getCompletions(statement:String) : IEnumerable<String> =
     } 
     |> Seq.distinct
 
-getCompletions("System.Console.") |> Seq.toList // <- todo fix filtering by method name
-// todo : remove add_ and remove_ prefixes
-
-
+getCompletions("System.Console.") |> Seq.toList 
 
 

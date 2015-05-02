@@ -45,6 +45,8 @@ namespace FSharp.Interactive.Intellisense
             var result = fsiProcess.Invoke("let test = 2 + 2;;");
 
             var fsiTypes = fsiProcess.GetType().Assembly.GetTypes();
+            Assembly fsAssembly = fsiProcess.GetType().Assembly;
+
 
             //dynamic r = sessionRValueValue.ProcessID;
             //dynamic fsharpInteractiveService = ExposedObject.From(sessionRValueValue).client;

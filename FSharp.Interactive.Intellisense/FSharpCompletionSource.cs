@@ -10,6 +10,8 @@ using Microsoft.VisualStudio.Utilities;
 using Microsoft.VisualStudio.Shell;
 using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using System.Reflection;
+using FSharp.Interactive.Intellisense.Lib;
+using System.Diagnostics;
 
 
 namespace FSharp.Interactive.Intellisense
@@ -74,6 +76,8 @@ namespace FSharp.Interactive.Intellisense
             return false;
         }
 
+        private AutocompleteService autocomplteService;
+
         void ICompletionSource.AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
         {
             //var triggerPoint = session.GetTriggerPoint(m_textBuffer.CurrentSnapshot);
@@ -81,6 +85,30 @@ namespace FSharp.Interactive.Intellisense
             //    return;
 
             //var applicableTo1 = m_textBuffer.CurrentSnapshot.CreateTrackingSpan(new SnapshotSpan(triggerPoint.Value, 1), SpanTrackingMode.EdgeInclusive);
+
+            //if (autocomplteService == null)
+            //{
+            //    try
+            //    {
+            //        autocomplteService = AutocompleteService.StartClient("channel");
+
+            //    } catch (Exception ex)
+            //    {
+            //        Debug.WriteLine(ex.ToString());
+            //    }
+            //}
+            //else
+            //{
+            //    try
+            //    {
+            //        Debug.WriteLine(autocomplteService.Test());
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Debug.WriteLine(ex.ToString());
+            //    }
+            //}
+            
 
             ITextSnapshot snapshot = m_textBuffer.CurrentSnapshot;
             SnapshotPoint? triggerPoint = session.GetTriggerPoint(snapshot);

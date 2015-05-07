@@ -44,7 +44,8 @@ namespace FSharp.Interactive.Intellisense
             MethodInfo methodInfo = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session+Session").GetMethods()[1];
             dynamic fsiProcess = methodInfo.Invoke((Object)sessionRValueValue, null);
 
-            var result = fsiProcess.Invoke("let test = 2 + 2;;");
+            fsiProcess.Invoke(String.Format("#r \"{0}\";;", typeof(AutocompleteServer).Assembly.Location));
+            fsiProcess.Invoke("FSharp.Interactive.Intellisense.Lib.AutocompleteServer.StartServer(\"channel\");;");
 
             var fsiTypes = fsiProcess.GetType().Assembly.GetTypes();
             Assembly fsAssembly = fsiProcess.GetType().Assembly;

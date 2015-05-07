@@ -12,8 +12,11 @@ open System.Reflection
 #r @"C:\Projects\TorrentRT\packages\FSharp.Data.2.1.1\lib\net40\FSharp.Data.dll";;
 open FSharp.Data;
 
-type Rss = XmlProvider<"https://www.torrentz.com/feed?f=trailer">
-//let feed = Rss.Load("https://www.torrentz.com/feed?f=%D0%BF%D0%BE%D0%B1%D0%B5%D0%B3")
+// Configure the type provider
+type NugetStats = HtmlProvider<"https://www.nuget.org/packages/FSharp.Data">
+
+// load the live package stats for FSharp.Data
+let rawStats = NugetStats().Tables.``Version History``
 
 
 let getLastPartialSegment (statement:String) = 

@@ -86,29 +86,6 @@ namespace FSharp.Interactive.Intellisense
 
             //var applicableTo1 = m_textBuffer.CurrentSnapshot.CreateTrackingSpan(new SnapshotSpan(triggerPoint.Value, 1), SpanTrackingMode.EdgeInclusive);
 
-            //if (autocomplteService == null)
-            //{
-            //    try
-            //    {
-            //        autocomplteService = AutocompleteService.StartClient("channel");
-
-            //    } catch (Exception ex)
-            //    {
-            //        Debug.WriteLine(ex.ToString());
-            //    }
-            //}
-            //else
-            //{
-            //    try
-            //    {
-            //        Debug.WriteLine(autocomplteService.Test());
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Debug.WriteLine(ex.ToString());
-            //    }
-            //}
-            
 
             ITextSnapshot snapshot = m_textBuffer.CurrentSnapshot;
             SnapshotPoint? triggerPoint = session.GetTriggerPoint(snapshot);
@@ -135,8 +112,32 @@ namespace FSharp.Interactive.Intellisense
 
             String statement = applicableTo1.GetText(applicableTo1.TextBuffer.CurrentSnapshot);
 
-            IEnumerable<String> completions = Lib.AutocompleteProvider.getCompletions(statement);
-            //IEnumerable<String> completions = GetSuggestionsForType(statement);
+            if (autocomplteService == null)
+            {
+                try
+                {
+                    autocomplteService = AutocompleteServer.StartClient("channel");
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToString());
+                }
+            }
+
+            IEnumerable<String> completions = new List<String>();
+            if (autocomplteService != null)
+            {
+                try
+                {
+                    completions = autocomplteService.GetCompletions(statement);
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToString());
+                }
+            }            //IEnumerable<String> completions = GetSuggestionsForType(statement);
 
             //List<string> strList = new List<string>();
             //strList.Add("addition");

@@ -8,7 +8,7 @@
     <ProjectGuid>0d841e3a-9f5e-4882-a95a-6acf08bde08a</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>FSharp.Interactive.Intellisence.Lib</RootNamespace>
-    <AssemblyName>FSharp.Interactive.Intellisence.Lib</AssemblyName>
+    <AssemblyName>FSharp.Interactive.Intellisense.Lib</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <Name>FSharp.Interactive.Intellisense.Lib</Name>

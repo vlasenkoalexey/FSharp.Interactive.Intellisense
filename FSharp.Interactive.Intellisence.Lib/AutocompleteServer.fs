@@ -6,14 +6,16 @@ open System.Runtime.Remoting.Channels.Ipc
 open System
 
 (*
-#r "C:\Users\Alexey\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Aleksey Vlasenko\FSharp.Interactive.Intellisense\1.0\FSharp.Interactive.Intellisence.Lib.dll";;
+#r "C:\Users\Alexey\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Aleksey Vlasenko\FSharp.Interactive.Intellisense\1.0\FSharp.Interactive.Intellisense.Lib.dll";;
 FSharp.Interactive.Intellisense.Lib.AutocompleteServer.StartServer("channel");;
 open FSharp.Interactive.Intellisense.Lib;;
 *)
 type AutocompleteServer() = 
     inherit AutocompleteService()
+
     override x.Test() = 5
     override x.GetBaseDirectory() = System.AppDomain.CurrentDomain.BaseDirectory
+    override x.GetCompletions(statement) = AutocompleteProvider.getCompletions(statement)
     
     static member StartServer(channelName : string) = 
         let channel = new IpcServerChannel("FSharp.Interactive.Intellisense.Lib")
@@ -23,9 +25,13 @@ type AutocompleteServer() =
             (typeof<AutocompleteServer>, "AutocompleteService", WellKnownObjectMode.Singleton)
     
     static member StartClient(channelName) = 
-        let channel = new IpcClientChannel()
-        //Register the channel with ChannelServices.
-        ChannelServices.RegisterChannel(channel, false)
+        try 
+            let channel = new IpcClientChannel()
+            //Register the channel with ChannelServices.
+            ChannelServices.RegisterChannel(channel, false)
+        with 
+            | _ -> ()
+
         //Register the client type.
         RemotingConfiguration.RegisterWellKnownClientType
             (typeof<AutocompleteServer>, "ipc://FSharp.Interactive.Intellisense.Lib/AutocompleteService")

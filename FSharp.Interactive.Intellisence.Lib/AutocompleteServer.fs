@@ -4,6 +4,8 @@ open System.Runtime.Remoting.Channels
 open System.Runtime.Remoting
 open System.Runtime.Remoting.Channels.Ipc
 open System
+open System.Reflection
+open System.Diagnostics
 
 (*
 #r "C:\Users\Alexey\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Aleksey Vlasenko\FSharp.Interactive.Intellisense\1.0\FSharp.Interactive.Intellisense.Lib.dll";;
@@ -13,9 +15,14 @@ open FSharp.Interactive.Intellisense.Lib;;
 type AutocompleteServer() = 
     inherit AutocompleteService()
 
+    do AppDomain.CurrentDomain.add_AssemblyResolve(fun obj arg -> Debug.WriteLine "Resolving FSharp.Interactive.Intellisense.dll"; typeof<AutocompleteServer>.Assembly)
+
     override x.Test() = 5
     override x.GetBaseDirectory() = System.AppDomain.CurrentDomain.BaseDirectory
-    override x.GetCompletions(statement) = AutocompleteProvider.getCompletions(statement)
+    override x.GetCompletions(statement:String) = 
+        Debugger.Break()
+        let results = AutocompleteProvider.getCompletions(statement) |> Seq.toArray
+        results
     
     static member StartServer(channelName : string) = 
         let channel = new IpcServerChannel("FSharp.Interactive.Intellisense.Lib")

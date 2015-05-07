@@ -12,4 +12,4 @@ type AutocompleteService() =
     inherit System.MarshalByRefObject()
     abstract Test : unit -> int
     abstract GetBaseDirectory : unit -> String
-    abstract GetCompletions: String -> seq<String>
+    abstract GetCompletions: String -> String[]

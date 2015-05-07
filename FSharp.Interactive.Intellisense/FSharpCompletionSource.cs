@@ -130,6 +130,7 @@ namespace FSharp.Interactive.Intellisense
             {
                 try
                 {
+                    int result = autocomplteService.Test();
                     completions = autocomplteService.GetCompletions(statement);
 
                 }
@@ -137,8 +138,9 @@ namespace FSharp.Interactive.Intellisense
                 {
                     Debug.WriteLine(ex.ToString());
                 }
-            }            //IEnumerable<String> completions = GetSuggestionsForType(statement);
-
+            }            
+            
+            //IEnumerable<String> completions = GetSuggestionsForType(statement);
             //List<string> strList = new List<string>();
             //strList.Add("addition");
             //strList.Add("adaptation");

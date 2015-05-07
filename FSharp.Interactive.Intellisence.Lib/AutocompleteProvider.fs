@@ -70,7 +70,7 @@ module AutocompleteProvider =
         |> Seq.toList
 
 
-    let getCompletionsForTypes(statement:String, fsiAssembly:Assembly) : IEnumerable<String> = seq {
+    let getCompletionsForTypes(statement:String, fsiAssembly:Assembly) : seq<String> = seq {
         for assemblyName in fsiAssembly.GetReferencedAssemblies() do
             //printfn "%s" assemblyName.FullName
             let matches = AppDomain.CurrentDomain.GetAssemblies() 
@@ -91,7 +91,7 @@ module AutocompleteProvider =
                         yield! memberNames
     }
 
-    let getCompletions(statement:String) : IEnumerable<String> =
+    let getCompletions(statement:String) : seq<String> =
         seq {
             let fsiAssembly = getFsiAssembly()
             if fsiAssembly.IsSome then

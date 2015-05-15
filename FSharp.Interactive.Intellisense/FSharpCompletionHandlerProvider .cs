@@ -28,12 +28,25 @@ namespace FSharp.Interactive.Intellisense
 
         public void VsTextViewCreated(IVsTextView textViewAdapter)
         {
+
             ITextView textView = AdapterService.GetWpfTextView(textViewAdapter);
             if (textView == null)
                 return;
 
             Func<FSharpCompletionCommandHandler> createCommandHandler = delegate() { return new FSharpCompletionCommandHandler(textViewAdapter, textView, this); };
             textView.Properties.GetOrCreateSingletonProperty(createCommandHandler);
+        }
+
+        public Package GetPackage()
+        {
+            try
+            {
+                return ExposedObject.From(ServiceProvider).ServiceProvider as Package;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
     }

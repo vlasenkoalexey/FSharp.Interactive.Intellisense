@@ -33,6 +33,12 @@ namespace FSharp.Interactive.Intellisense
 
             Type sessionsType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session.Sessions");
 
+            Type fsiWindow = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
+
+            
+
+            
+
             var providerGlobal = (IOleServiceProvider)Package.GetGlobalService(typeof(IOleServiceProvider));
             var provider = new ServiceProvider(providerGlobal);
             dynamic fsiLanguageService = ExposedObject.From(provider.GetService(fsiLanguageServiceType));

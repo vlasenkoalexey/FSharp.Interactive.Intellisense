@@ -20,7 +20,7 @@ type AutocompleteServer() =
     override x.Test() = 5
     override x.GetBaseDirectory() = System.AppDomain.CurrentDomain.BaseDirectory
     override x.GetCompletions(statement:String) = 
-        Debugger.Break()
+        //Debugger.Break()
         let results = AutocompleteProvider.getCompletions(statement) |> Seq.toArray
         results
     

@@ -55,10 +55,15 @@ namespace FSharp.Interactive.Intellisense
 
             //add the command to the command chain
 
-            Task.Delay(1000).ContinueWith((a) =>
-                {
+            //Task.Delay(1000).ContinueWith((a) =>
+            //    {
+                    //IOleCommandTarget fsiToolWindow = CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter), "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
+                    //textViewAdapter.RemoveCommandFilter(fsiToolWindow);
+                    //IOleCommandTarget m_nextCommandHandler1;
                     textViewAdapter.AddCommandFilter(this, out m_nextCommandHandler);
-                });
+                    //textViewAdapter.AddCommandFilter(fsiToolWindow, out m_nextCommandHandler);
+                    RegisterKeyDown(textView);
+                //});
 
             //textViewAdapter.RemoveCommandFilter()
 
@@ -76,8 +81,10 @@ namespace FSharp.Interactive.Intellisense
             ((System.Windows.Controls.Control)this.m_textView).AddHandler(System.Windows.Window.PreviewKeyDownEvent, 
                 new KeyEventHandler(ControlViewer_KeyUp), true);
 
-            // TODO: figure out what exception is thrown ++++
-            //RegisterKeyDown(textView);
+            // TODO: figure out what exception is thrown when we are removing FsiToolWindow
+            // TODO: try to trick FsiToolWindow by setting isCurrentPositionInInputArea to false
+            // TODO: try to trick FsiToolWindow by setting source.IsCompletorActive <- completionSet.IsDisplayed
+            // TODO: try to attach key up/down event to another control - filter works, but event subscription doesnt
             // TODO: read about adding up / down events to wpf textbox
             // TODO: try attaching to the parent element (see above)
             // TODO: look in F# intellisense code, how pagedown is handled +++
@@ -87,6 +94,7 @@ namespace FSharp.Interactive.Intellisense
             // TODO: use reflection to find FsiFilter in command chain 
             //((Microsoft.VisualStudio.Editor.Implementation.CommandChainNode)(((Microsoft.VisualStudio.Editor.Implementation.CommandChainNode)(((Microsoft.VisualStudio.Editor.Implementation.CommandChainNode)(((Microsoft.VisualStudio.Editor.Implementation.SimpleTextViewWindow)(textViewAdapter))._commandChain.Next)).Next)).Next))
             // Remove it and add only after my filer
+            // ((Microsoft.VisualStudio.Package.Source)(((Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow)(fsiToolWindow)).source)).CompletionSet - is it intellisense?
 
         }
 
@@ -137,7 +145,14 @@ namespace FSharp.Interactive.Intellisense
 
                 if (commandChainWrapper.Next != null)
                 {
-                    return GetFilterByFullClassName(commandChainWrapper.Next, className);
+                    try
+                    {
+                        return GetFilterByFullClassName(commandChainWrapper.Next, className);
+                    } catch (Exception ex)
+                    {
+                        return null;
+                    }
+                   
                 }
 
                 return null;
@@ -155,13 +170,13 @@ namespace FSharp.Interactive.Intellisense
         {
             OleMenuCommandService oleMenuCommandService;
             CommandID commandID;
-            MenuCommand menuCommand;
+            OleMenuCommand menuCommand;
             
             //var providerGlobal = (IOleServiceProvider)Package.GetGlobalService(typeof(IOleServiceProvider));
             
             //var provider = new ServiceProvider(providerGlobal);
 
-            Package package = m_provider.GetPackage();
+            //Package package = m_provider.GetPackage();
             //OleMenuCommandService oleMenuCommandService = ExposedObject.From(package).GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
 
             //Assembly fsiAssembly = Assembly.Load("FSharp.VS.FSI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -172,42 +187,73 @@ namespace FSharp.Interactive.Intellisense
            
 
             //oleMenuCommandService = provider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            oleMenuCommandService = new OleMenuCommandService(package);
+            //dynamic textViewAdapterExposedObject = ExposedObject.From(textViewAdapter);
+            //oleMenuCommandService = textViewAdapterExposedObject.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+
+            //IOleCommandTarget fsiToolWindow = CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter), "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
+
+            ////this.textViewAdapter.RemoveCommandFilter(fsiToolWindow);
+            
+            //System.IServiceProvider provider = (System.IServiceProvider)(Object)fsiToolWindow;
+
+            //if (provider == null)
+            //{
+            //    return;
+            //}
+
+            //oleMenuCommandService = ExposedObject.From(provider).commandService;
+                
+            oleMenuCommandService = new OleMenuCommandService((System.IServiceProvider)(Object)textViewAdapter, m_nextCommandHandler);
 
             if (oleMenuCommandService != null)
             {
                 var guidVSStd2KCmdID = typeof(VSConstants.VSStd2KCmdID).GUID;
-                commandID = new CommandID(guidVSStd2KCmdID, (int)VSConstants.VSStd2KCmdID.RIGHT);
+                commandID = new CommandID(guidVSStd2KCmdID, (int)VSConstants.VSStd2KCmdID.BACKSPACE);
 
-                menuCommand = new MenuCommand(MenuCommandCallback, commandID);
+                menuCommand = new OleMenuCommand(MenuCommandCallback, commandID);
+                menuCommand.BeforeQueryStatus += menuCommand_BeforeQueryStatus;
 
-                oleMenuCommandService.AddCommand(menuCommand);
+                //oleMenuCommandService.AddCommand(menuCommand);
             }
+        }
+
+        private void MoveFsiWindowFilterAfterSelf()
+        {
+
+            //this.textViewAdapter.RemoveCommandFilter(fsiToolWindow);
+
+        }
+
+        void menuCommand_BeforeQueryStatus(object sender, EventArgs e)
+        {
+
         }
 
         private void ControlViewer_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Tab || e.Key == Key.Space || e.Key == Key.Up)
             {
-                e.Handled = true;
+            //    e.Handled = true;
             }
         }
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
-            //if (pguidCmdGroup == VSConstants.VSStd2K)
-            //{
-            //    Debug.WriteLine(String.Format("QueryStatus up[{0}] down[{1}] value[{2}]", (uint)VSConstants.VSStd2KCmdID.UP,
-            //        (uint)VSConstants.VSStd2KCmdID.DOWN, ((prgCmds != null && prgCmds.Length > 0) ? prgCmds[0].cmdID.ToString() : "")));
-            //}
+            if (pguidCmdGroup == VSConstants.VSStd2K)
+            {
+                Debug.WriteLine(String.Format("QueryStatus up[{0}] down[{1}] value[{2}]", (uint)VSConstants.VSStd2KCmdID.UP,
+                    (uint)VSConstants.VSStd2KCmdID.DOWN, ((prgCmds != null && prgCmds.Length > 0) ? prgCmds[0].cmdID.ToString() : "")));
+            }
             return m_nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
         }
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            //IOleCommandTarget fsiToolWindowFilter =
-            //    CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter),
-            //        "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
+            IOleCommandTarget fsiToolWindowFilter =
+                CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter),
+                    "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
+
+            //textViewAdapter.RemoveCommandFilter(fsiToolWindowFilter);
 
 
             Debug.WriteLine(String.Format("Exec up[{0}] down[{1}] value[{2}]", (uint)VSConstants.VSStd2KCmdID.UP,
@@ -273,26 +319,30 @@ namespace FSharp.Interactive.Intellisense
                     m_session.Filter();
                 }
 
-                dynamic presenter = ExposedObject.From(m_session.Presenter);
-                IIntellisensePresenter intelisensePresenter = m_session.Presenter;
-                System.Windows.Controls.ContentControl surfaceElement = (System.Windows.Controls.ContentControl)presenter.SurfaceElement;
-                surfaceElement.KeyDown += (h, e) =>
-                {
-                    if (e.Key == System.Windows.Input.Key.Down)
-                    {
-                        e.Handled = true;
-                    }
-                };
-                surfaceElement.KeyUp += (h, e) =>
-                {
-                    if (e.Key == System.Windows.Input.Key.Down)
-                    {
-                        e.Handled = true;
-                    }
-                };
-                surfaceElement.Focus();
 
-                handled = true;
+                if (m_session != null && m_session.Presenter != null)
+                {
+                    dynamic presenter = ExposedObject.From(m_session.Presenter);
+                    IIntellisensePresenter intelisensePresenter = m_session.Presenter;
+                    System.Windows.Controls.ContentControl surfaceElement = (System.Windows.Controls.ContentControl)presenter.SurfaceElement;
+                    surfaceElement.KeyDown += (h, e) =>
+                    {
+                        if (e.Key == System.Windows.Input.Key.Down)
+                        {
+                            e.Handled = true;
+                        }
+                    };
+                    surfaceElement.KeyUp += (h, e) =>
+                    {
+                        if (e.Key == System.Windows.Input.Key.Down)
+                        {
+                            e.Handled = true;
+                        }
+                    };
+                    surfaceElement.Focus();
+
+                    handled = true;
+                }
             }
             else if (commandID == (uint)VSConstants.VSStd2KCmdID.BACKSPACE   //redo the filter if there is a deletion
                 || commandID == (uint)VSConstants.VSStd2KCmdID.DELETE)
@@ -323,6 +373,13 @@ namespace FSharp.Interactive.Intellisense
 
             //subscribe to the Dismissed event on the session 
             m_session.Dismissed += this.OnSessionDismissed;
+
+            //HACK start
+            //var snapshot = new SnapshotPoint(m_textView.TextBuffer.CurrentSnapshot, m_textView.Caret.Position.BufferPosition.Position);
+            //m_textView.TextBuffer.Insert(m_textView.TextBuffer.CurrentSnapshot.Length, "_");
+            //m_textView.Caret.MoveTo(snapshot);
+            //HACK end
+
             m_session.Start();
 
             return true;

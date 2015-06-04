@@ -27,6 +27,7 @@ namespace FSharp.Interactive.Intellisense
         private FSharpCompletionHandlerProvider m_provider;
         private ICompletionSession m_session;
         private IVsTextView textViewAdapter;
+        private IOleCommandTarget fsiToolWindow;
 
         internal FSharpCompletionCommandHandler(IVsTextView textViewAdapter, ITextView textView, FSharpCompletionHandlerProvider fsharpCompletionHandlerProvider)
         {
@@ -64,6 +65,12 @@ namespace FSharp.Interactive.Intellisense
                     //textViewAdapter.AddCommandFilter(fsiToolWindow, out m_nextCommandHandler);
                     RegisterKeyDown(textView);
                 //});
+
+
+            Task.Delay(1000).ContinueWith((a) =>
+            {
+                this.fsiToolWindow = CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter), "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
+            });
 
             //textViewAdapter.RemoveCommandFilter()
 
@@ -304,7 +311,7 @@ namespace FSharp.Interactive.Intellisense
             //pass along the command so the char is added to the buffer 
             int retVal = m_nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             bool handled = false;
-            if (!typedChar.Equals(char.MinValue) && char.IsLetterOrDigit(typedChar))
+            if (!typedChar.Equals(char.MinValue) && (char.IsLetterOrDigit(typedChar) || typedChar == '.'))
             {
                 if (m_session == null || m_session.IsDismissed) // If there is no active session, bring up completion
                 {
@@ -366,8 +373,7 @@ namespace FSharp.Interactive.Intellisense
                 return false;
             }
 
-            m_session = m_provider.CompletionBroker.CreateCompletionSession
-         (m_textView,
+            m_session = m_provider.CompletionBroker.CreateCompletionSession(m_textView,
                 caretPoint.Value.Snapshot.CreateTrackingPoint(caretPoint.Value.Position, PointTrackingMode.Positive),
                 true);
 
@@ -375,12 +381,38 @@ namespace FSharp.Interactive.Intellisense
             m_session.Dismissed += this.OnSessionDismissed;
 
             //HACK start
-            //var snapshot = new SnapshotPoint(m_textView.TextBuffer.CurrentSnapshot, m_textView.Caret.Position.BufferPosition.Position);
-            //m_textView.TextBuffer.Insert(m_textView.TextBuffer.CurrentSnapshot.Length, "_");
-            //m_textView.Caret.MoveTo(snapshot);
+            //var snapshot = new SnapshotPoint(m_textView.TextBuffer.CurrentSnapshot, m_textView.Caret.Position.BufferPosition.Position - 1);
+            //m_textView.TextBuffer.Insert(m_textView.TextBuffer.CurrentSnapshot.Length, " ");
+            //m_textView.Caret.MoveTo(m_textView.Caret.ContainingTextViewLine, m_textView.Caret.Left - 10);
             //HACK end
 
+            //HACK start
+            //var snapshot = new SnapshotPoint(m_textView.TextBuffer.CurrentSnapshot, m_textView.Caret.Position.BufferPosition.Position);
+            //m_textView.TextBuffer.Insert(m_textView.TextBuffer.CurrentSnapshot.Length, " ");
+            //m_textView.Caret.MoveTo(caretPoint.Value);
+            //HACK end
+
+            //var pos = new SnapshotPoint(m_textView.Caret.Position.BufferPosition.Snapshot,
+            //                m_textView.Caret.Position.BufferPosition.Position);
+            //m_textView.TextBuffer.Insert(m_textView.TextBuffer.CurrentSnapshot.Length, " ");
+            //m_textView.Caret.MoveTo(pos);
+
             m_session.Start();
+
+            // TODO: wrap fsiToolWindow into class
+            if (fsiToolWindow != null)
+            {
+                dynamic source = ExposedObject.From(fsiToolWindow).source;
+                if (source != null)
+                {
+                    dynamic completionSet = ExposedObject.From(source).CompletionSet;
+                    if (completionSet != null)
+                    {
+                        dynamic completionSetExp = ExposedObject.From(completionSet);
+                        completionSetExp.displayed = true;
+                    }
+                }
+            }
 
             return true;
         }
@@ -389,6 +421,19 @@ namespace FSharp.Interactive.Intellisense
         {
             m_session.Dismissed -= this.OnSessionDismissed;
             m_session = null;
+            if (fsiToolWindow != null)
+            {
+                dynamic source = ExposedObject.From(fsiToolWindow).source;
+                if (source != null)
+                {
+                    dynamic completionSet = ExposedObject.From(source).CompletionSet;
+                    if (completionSet != null)
+                    {
+                        dynamic completionSetExp = ExposedObject.From(completionSet);
+                        completionSetExp.displayed = false;
+                    }
+                }
+            }
         }
     }
 }

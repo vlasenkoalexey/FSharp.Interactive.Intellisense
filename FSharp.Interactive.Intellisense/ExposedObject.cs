@@ -137,6 +137,15 @@ namespace FSharp.Interactive.Intellisense
                 binder.Name,
                 BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
 
+            // BindingFlags.FlattenHierarchy doesn't work for fields
+            // TODO: support extracting fields from any subclass.
+            if (fieldInfo == null && m_type.BaseType != null && m_type.BaseType != typeof(object))
+            {
+                fieldInfo = m_type.BaseType.GetField(
+                    binder.Name,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+            }
+
             if (fieldInfo != null)
             {
                 fieldInfo.SetValue(m_object, value);

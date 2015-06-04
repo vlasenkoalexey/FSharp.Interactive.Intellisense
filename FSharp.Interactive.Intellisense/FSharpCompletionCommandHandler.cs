@@ -67,8 +67,9 @@ namespace FSharp.Interactive.Intellisense
                 //});
 
 
-            Task.Delay(9000).ContinueWith((a) =>
+            Task.Delay(2000).ContinueWith((a) =>
             {
+                // TODO: make it method safe by limiting max depth
                 this.fsiToolWindow = CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter), "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
             });
 
@@ -402,7 +403,7 @@ namespace FSharp.Interactive.Intellisense
             m_session.Start();
 
             // TODO: wrap fsiToolWindow into class
-            if (fsiToolWindow != null)
+            if (fsiToolWindow != null && m_session != null)
             {
                 dynamic source = ExposedObject.From(fsiToolWindow).source;
                 if (source != null)

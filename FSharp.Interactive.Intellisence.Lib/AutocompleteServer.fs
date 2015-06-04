@@ -9,7 +9,7 @@ open System.Diagnostics
 
 (*
 #r "C:\Users\Alexey\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Aleksey Vlasenko\FSharp.Interactive.Intellisense\1.0\FSharp.Interactive.Intellisense.Lib.dll";;
-FSharp.Interactive.Intellisense.Lib.AutocompleteServer.StartServer("channel");;
+FSharp.Interactive.Intellisense.Lib.AutocompleteServer.StartServer("FSharp.Interactive.Intellisense.Lib");;
 open FSharp.Interactive.Intellisense.Lib;;
 *)
 type AutocompleteServer() = 
@@ -25,9 +25,10 @@ type AutocompleteServer() =
         results
     
     static member StartServer(channelName : string) = 
-        let channel = new IpcServerChannel("FSharp.Interactive.Intellisense.Lib")
+        let channel = new IpcServerChannel("FSharp.Interactive.Intellisense.Lib") // TODO: make it unique
         //Register the server channel.
         ChannelServices.RegisterChannel(channel, false)
+        Debug.WriteLine("Registered FSharp.Interactive.Intellisense.Lib channel")
         RemotingConfiguration.RegisterWellKnownServiceType
             (typeof<AutocompleteServer>, "AutocompleteService", WellKnownObjectMode.Singleton)
     

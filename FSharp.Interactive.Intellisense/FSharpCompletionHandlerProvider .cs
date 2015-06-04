@@ -16,7 +16,7 @@ namespace FSharp.Interactive.Intellisense
     [Export(typeof(IVsTextViewCreationListener))]
     [Name("token completion")]
     [ContentType("any")]
-    [TextViewRole(PredefinedTextViewRoles.Analyzable)]
+    [TextViewRole(PredefinedTextViewRoles.Analyzable)] // TODO: use FSI window id here
     internal class FSharpCompletionHandlerProvider : IVsTextViewCreationListener
     {
         [Import]

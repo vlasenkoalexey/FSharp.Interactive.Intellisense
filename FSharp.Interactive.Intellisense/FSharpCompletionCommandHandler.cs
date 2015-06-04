@@ -67,7 +67,7 @@ namespace FSharp.Interactive.Intellisense
                 //});
 
 
-            Task.Delay(1000).ContinueWith((a) =>
+            Task.Delay(9000).ContinueWith((a) =>
             {
                 this.fsiToolWindow = CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter), "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
             });
@@ -88,9 +88,11 @@ namespace FSharp.Interactive.Intellisense
             ((System.Windows.Controls.Control)this.m_textView).AddHandler(System.Windows.Window.PreviewKeyDownEvent, 
                 new KeyEventHandler(ControlViewer_KeyUp), true);
 
-            // TODO: figure out what exception is thrown when we are removing FsiToolWindow
-            // TODO: try to trick FsiToolWindow by setting isCurrentPositionInInputArea to false
-            // TODO: try to trick FsiToolWindow by setting source.IsCompletorActive <- completionSet.IsDisplayed
+            // TODO: try out to init built in intellisense provider again.
+
+            // TODO: figure out what exception is thrown when we are removing FsiToolWindow + 
+            // TODO: try to trick FsiToolWindow by setting isCurrentPositionInInputArea to false -
+            // TODO: try to trick FsiToolWindow by setting source.IsCompletorActive <- completionSet.IsDisplayed +
             // TODO: try to attach key up/down event to another control - filter works, but event subscription doesnt
             // TODO: read about adding up / down events to wpf textbox
             // TODO: try attaching to the parent element (see above)
@@ -246,11 +248,11 @@ namespace FSharp.Interactive.Intellisense
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
-            if (pguidCmdGroup == VSConstants.VSStd2K)
-            {
-                Debug.WriteLine(String.Format("QueryStatus up[{0}] down[{1}] value[{2}]", (uint)VSConstants.VSStd2KCmdID.UP,
-                    (uint)VSConstants.VSStd2KCmdID.DOWN, ((prgCmds != null && prgCmds.Length > 0) ? prgCmds[0].cmdID.ToString() : "")));
-            }
+            //if (pguidCmdGroup == VSConstants.VSStd2K)
+            //{
+            //    Debug.WriteLine(String.Format("QueryStatus up[{0}] down[{1}] value[{2}]", (uint)VSConstants.VSStd2KCmdID.UP,
+            //        (uint)VSConstants.VSStd2KCmdID.DOWN, ((prgCmds != null && prgCmds.Length > 0) ? prgCmds[0].cmdID.ToString() : "")));
+            //}
             return m_nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
         }
 
@@ -279,10 +281,10 @@ namespace FSharp.Interactive.Intellisense
                 typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
             }
 
-            if (nCmdID == (uint)VSConstants.VSStd2KCmdID.DOWN || nCmdID == (uint)VSConstants.VSStd2KCmdID.UP)
-            {
-                return VSConstants.S_OK;
-            }
+            //if (m_session != null && !m_session.IsDismissed && (nCmdID == (uint)VSConstants.VSStd2KCmdID.DOWN || nCmdID == (uint)VSConstants.VSStd2KCmdID.UP))
+            //{
+            //    return VSConstants.S_OK;
+            //}
 
             //check for a commit character 
             if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN

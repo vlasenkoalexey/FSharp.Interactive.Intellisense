@@ -100,6 +100,9 @@ module AutocompleteProvider =
                 if statement.LastIndexOf('.') < 0 then
                     yield! getVariableNames(fsiAssembly.Value) |> Seq.filter(fun n -> n.StartsWith(statement))
                     yield! getMethodNames(fsiAssembly.Value) |> Seq.filter(fun n -> n.StartsWith(statement))
+//                else 
+//                    let variables = getVariableNames(fsiAssembly.Value) |> Seq.filter(fun n -> n.StartsWith(statement)) // Take first segment here?
+//                    yield! variables // TODO take out methods and variables from this variable
         } 
         |> Seq.distinct
         |> Seq.sort

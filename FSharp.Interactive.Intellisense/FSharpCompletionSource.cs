@@ -147,25 +147,26 @@ namespace FSharp.Interactive.Intellisense
                 }
             }            
             
-            //IEnumerable<String> completions = GetSuggestionsForType(statement);
-            //List<string> strList = new List<string>();
-            //strList.Add("addition");
-            //strList.Add("adaptation");
-            //strList.Add("subtraction");
-            //strList.Add("summation");
             m_compList = new List<Completion>();
+            bool prependDot = statement.EndsWith(".");
             foreach (string str in completions)
-                m_compList.Add(new Completion(str, str, str, null, null));
+                m_compList.Add(new Completion(str, prependDot ? "." + str : str, str, null, null));
 
             var applicableTo = FindTokenSpanAtPosition(session.GetTriggerPoint(m_textBuffer),
                     session);
 
-            completionSets.Add(new CompletionSet(
+            CompletionSet completionSet = new CompletionSet(
                 "Tokens",    //the non-localized title of the tab 
                 "Tokens",    //the display title of the tab
                 applicableTo,
                 m_compList,
-                null));
+                null);
+
+            // Following code doesn't work:
+            //ExposedObject.From(completionSet)._filterMatchType =
+            //    Microsoft.VisualStudio.Language.Intellisense.CompletionMatchType.MatchInsertionText;
+
+            completionSets.Add(completionSet);
         }
 
         private ITrackingSpan FindTokenSpanAtPosition(ITrackingPoint point, ICompletionSession session)

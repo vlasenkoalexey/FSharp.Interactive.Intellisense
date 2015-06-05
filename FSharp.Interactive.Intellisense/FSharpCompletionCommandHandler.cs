@@ -290,7 +290,7 @@ namespace FSharp.Interactive.Intellisense
             //check for a commit character 
             if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN
                 || nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB
-                || (char.IsWhiteSpace(typedChar) || char.IsPunctuation(typedChar)))
+                || (char.IsWhiteSpace(typedChar) || (char.IsPunctuation(typedChar) && typedChar != '.')))
             {
 
                 //check for a a selection 
@@ -301,7 +301,10 @@ namespace FSharp.Interactive.Intellisense
                     {
                         m_session.Commit();
                         //also, don't add the character to the buffer 
-                        return VSConstants.S_OK;
+                        if (typedChar != '.')
+                        {
+                            return VSConstants.S_OK;
+                        }
                     }
                     else
                     {
@@ -319,16 +322,28 @@ namespace FSharp.Interactive.Intellisense
                 if (m_session == null || m_session.IsDismissed) // If there is no active session, bring up completion
                 {
                     this.TriggerCompletion();
-                    if (m_session != null)
+                    if (m_session != null && typedChar != '.')
                     {
                         m_session.Filter();
                     }
                 }
                 else     //the completion session is already active, so just filter
                 {
-                    m_session.Filter();
+                    if (m_session.SelectedCompletionSet != null &&
+                        m_session.SelectedCompletionSet.Completions != null &&
+                        m_session.SelectedCompletionSet.Completions.Count > 0 &&
+                        m_session.SelectedCompletionSet.Completions[0].InsertionText.StartsWith("."))
+                    {
+                        // For sorm reason m_session.Filter() filters by DisplayName, not InsertionText no matter what.
+                        // Probbly need to remimplement it in order to work properly, otherwise just restarting completion session.
+                        m_session.Dismiss();
+                        this.TriggerCompletion();
+                    }
+                    else
+                    {
+                        m_session.Filter();
+                    }
                 }
-
 
                 if (m_session != null && m_session.Presenter != null)
                 {
@@ -376,9 +391,15 @@ namespace FSharp.Interactive.Intellisense
                 return false;
             }
 
-            m_session = m_provider.CompletionBroker.CreateCompletionSession(m_textView,
-                caretPoint.Value.Snapshot.CreateTrackingPoint(caretPoint.Value.Position, PointTrackingMode.Positive),
-                true);
+            //m_session = m_provider.CompletionBroker.CreateCompletionSession(m_textView,
+            //    caretPoint.Value.Snapshot.CreateTrackingPoint(caretPoint.Value.Position, PointTrackingMode.Positive),
+            //    true);
+            m_session = m_provider.CompletionBroker.TriggerCompletion(m_textView);
+
+            if (m_session == null)
+            {
+                return false;
+            }
 
             //subscribe to the Dismissed event on the session 
             m_session.Dismissed += this.OnSessionDismissed;
@@ -400,7 +421,7 @@ namespace FSharp.Interactive.Intellisense
             //m_textView.TextBuffer.Insert(m_textView.TextBuffer.CurrentSnapshot.Length, " ");
             //m_textView.Caret.MoveTo(pos);
 
-            m_session.Start();
+            //m_session.Start();
 
             // TODO: wrap fsiToolWindow into class
             if (fsiToolWindow != null && m_session != null)

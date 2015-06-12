@@ -6,6 +6,15 @@ module AutocompleteProvider =
     open System.Collections.Generic
     open System.Reflection
 
+    // Returns first segment foo.bar -> foo
+    let getFirstSegment(statement:String) =
+        let firstStatementDotIndex = statement.IndexOf('.')
+        if firstStatementDotIndex > 0 then
+            statement.Remove(firstStatementDotIndex)
+        else
+            statement
+
+    // Returns last segment: foo.bar.ba -> ba
     let getLastPartialSegment (statement:String) = 
         let lastStatmentDotIndex = statement.LastIndexOf('.')
         if lastStatmentDotIndex > 0 then
@@ -13,6 +22,7 @@ module AutocompleteProvider =
         else
             statement
 
+    // Returns last completed segment foo.bar.baz, foo.bar.b -> baz
     let getLastSegment (statement:String, line:String) = 
         let lastStatmentDotIndex = statement.LastIndexOf('.')
         let nextDotIndex = line.IndexOf('.', lastStatmentDotIndex + 1)
@@ -45,30 +55,48 @@ module AutocompleteProvider =
         System.AppDomain.CurrentDomain.GetAssemblies() 
         |> Seq.find (fun assm -> assm.GetName().Name = "Fsi")
 
+    let getPropertyInfosForType(t:Type) = 
+        let flags = BindingFlags.Static ||| BindingFlags.Instance ||| BindingFlags.Public ||| BindingFlags.FlattenHierarchy 
+        t.GetProperties(flags) 
+        |> Seq.filter (fun pi -> pi.IsSpecialName |> not && pi.GetIndexParameters().Length > 0  |> not && pi.Name.Contains("@") |> not)
 
     let getVariableNames(fsiAssembly:Assembly) =
         fsiAssembly.GetTypes()//FSI types have the name pattern FSI_####, where #### is the order in which they were created
         |> Seq.filter (fun ty -> ty.Name.StartsWith("FSI_"))
         |> Seq.sortBy (fun ty -> ty.Name.Split('_').[1] |> int)
-        |> Seq.collect (fun ty ->
-            let flags = BindingFlags.Static ||| BindingFlags.NonPublic ||| BindingFlags.Public
-            ty.GetProperties(flags) 
-            |> Seq.filter (fun pi -> pi.GetIndexParameters().Length > 0  |> not && pi.Name.Contains("@") |> not))
+        |> Seq.collect (fun ty -> getPropertyInfosForType(ty))
         |> Seq.map (fun pi -> pi.Name)
         |> Seq.distinct
 
+    let getVariableTypeByName(fsiAssembly:Assembly, name:String) =
+        fsiAssembly.GetTypes()//FSI types have the name pattern FSI_####, where #### is the order in which they were created
+        |> Seq.filter (fun ty -> ty.Name.StartsWith("FSI_"))
+        |> Seq.sortBy (fun ty -> ty.Name.Split('_').[1] |> int)
+        |> Seq.collect (fun ty -> getPropertyInfosForType(ty))
+        |> Seq.tryFind (fun pi -> pi.Name.Equals(name, StringComparison.Ordinal))
+        |> Option.map (fun pi -> pi.PropertyType)
+
+    let getVariableNamesForType(t:Type) = 
+        getPropertyInfosForType(t)
+        |> Seq.map (fun pi -> pi.Name)
+        |> Seq.distinct
+
+    let getMethodInfosForType(t:Type) =
+        let flags = BindingFlags.Static ||| BindingFlags.Public ||| BindingFlags.FlattenHierarchy ||| BindingFlags.Instance
+        t.GetMethods(flags) 
+        |> Seq.filter (fun pi -> pi.IsSpecialName |> not && pi.Name.Contains("@") |> not && pi.Name.StartsWith("get_") |> not && pi.Name.StartsWith("set_") |> not)
 
     let getMethodNames(fsiAssembly:Assembly) =
         fsiAssembly.GetTypes()
         |> Seq.filter (fun ty -> ty.Name.StartsWith("FSI_")) 
-        |> Seq.collect (fun ty ->
-            let flags = BindingFlags.Static ||| BindingFlags.NonPublic ||| BindingFlags.Public
-            ty.GetMethods(flags) 
-            |> Seq.filter (fun pi -> pi.Name.Contains("@") |> not && pi.Name.StartsWith("get_") |> not && pi.Name.StartsWith("set_") |> not))
-        |> Seq.map (fun pi -> pi.Name)
+        |> Seq.collect (fun ty -> getMethodInfosForType(ty))
+        |> Seq.map (fun mi -> mi.Name)
         |> Seq.distinct
-        |> Seq.toList
 
+    let getMethodNamesForType(t:Type) =
+        getMethodInfosForType(t)
+        |> Seq.map (fun mi -> mi.Name)
+        |> Seq.distinct
 
     let getCompletionsForTypes(statement:String, fsiAssembly:Assembly) : seq<String> = seq {
         for assemblyName in fsiAssembly.GetReferencedAssemblies() do
@@ -100,9 +128,17 @@ module AutocompleteProvider =
                 if statement.LastIndexOf('.') < 0 then
                     yield! getVariableNames(fsiAssembly.Value) |> Seq.filter(fun n -> n.StartsWith(statement))
                     yield! getMethodNames(fsiAssembly.Value) |> Seq.filter(fun n -> n.StartsWith(statement))
-//                else 
-//                    let variables = getVariableNames(fsiAssembly.Value) |> Seq.filter(fun n -> n.StartsWith(statement)) // Take first segment here?
-//                    yield! variables // TODO take out methods and variables from this variable
+                else 
+                    let variables = getVariableNames(fsiAssembly.Value) |> Seq.filter(fun n -> n.StartsWith(getFirstSegment(statement)))
+                    if variables |> Seq.isEmpty then
+                        yield! variables // TODO take out methods and variables from this variable
+                    else
+                        let variable = variables |> Seq.head
+                        let typeOpt = getVariableTypeByName(fsiAssembly.Value, variable)
+                        if typeOpt.IsSome then
+                            let noFirstSegmentStatement = statement.Remove(0, variable.Length + 1)
+                            yield! getVariableNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement))
+                            yield! getMethodNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement))
         } 
         |> Seq.distinct
         |> Seq.sort

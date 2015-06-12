@@ -6,7 +6,7 @@ TODO:
 + Autocomplete on System. <- after dot
 + Autocomplete popup control
 + Autocomplete popup control navigation
-- Autocomplete on variable methods (let cool = "blah"; cool. <- after dot)
++ Autocomplete on variable methods (let cool = "blah"; cool. <- after dot)
 - Using unique Remoting channel
 - More clever registration (on FSI is reloaded or something like that)
 - UnitTests for AutocompleteProvider

@@ -7,9 +7,9 @@ TODO:
 + Autocomplete popup control
 + Autocomplete popup control navigation
 + Autocomplete on variable methods (let cool = "blah"; cool. <- after dot)
++ UnitTests for AutocompleteProvider
 - Using unique Remoting channel
 - More clever registration (on FSI is reloaded or something like that)
-- UnitTests for AutocompleteProvider
 
 P2:
 - Autocomplete on Ctrl + tab

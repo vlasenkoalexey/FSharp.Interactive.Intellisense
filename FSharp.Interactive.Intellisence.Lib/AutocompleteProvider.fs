@@ -31,21 +31,23 @@ module AutocompleteProvider =
         else
             line.Substring(lastStatmentDotIndex + 1)
 
-    let getTypeCompletionsForAssembly(statement:String, assembly:Assembly) : IEnumerable<String> =
-        let assemblyTypeNames = assembly.GetTypes()
-                                    |> Seq.filter(fun t -> t.IsPublic)
-                                    |> Seq.map (fun t -> if t.FullName.LastIndexOf('`') > 0 then t.FullName.Remove(t.FullName.LastIndexOf('`')) else t.FullName) 
-                                    |> Seq.filter(fun t -> t.StartsWith(statement))
-                                    |> Seq.map(fun n -> getLastSegment(statement, n))
-                                    |> Seq.distinct
+    let getCompletionsForTypes(statement:String, types:seq<Type>) : IEnumerable<String> =
+        let assemblyTypeNames = 
+            types
+            |> Seq.filter(fun t -> t.IsPublic)
+            |> Seq.map (fun t -> if t.FullName.LastIndexOf('`') > 0 then t.FullName.Remove(t.FullName.LastIndexOf('`')) else t.FullName) 
+            |> Seq.filter(fun t -> t.StartsWith(statement))
+            |> Seq.map(fun n -> getLastSegment(statement, n))
+            |> Seq.distinct
         assemblyTypeNames
 
-    let prefixesToRemoveRegex = ["get_"; "set_"; "add_"; "remove_"];
     let rec removePropertyPrefixRec (memberName:String) (prefixesToRemoveRegex:String list) =
         match prefixesToRemoveRegex with
         | head::tail -> if (memberName.StartsWith(head)) then memberName.Remove(0, head.Length) else removePropertyPrefixRec memberName tail
         | _ -> memberName
-    let removePropertyPrefix (memberName:String) = removePropertyPrefixRec memberName prefixesToRemoveRegex
+    let removePropertyPrefix (memberName:String) = 
+        let prefixesToRemoveRegex = ["get_"; "set_"; "add_"; "remove_"];
+        removePropertyPrefixRec memberName prefixesToRemoveRegex
 
     let getFsiAssembly() = 
         System.AppDomain.CurrentDomain.GetAssemblies() 
@@ -98,14 +100,14 @@ module AutocompleteProvider =
         |> Seq.map (fun mi -> mi.Name)
         |> Seq.distinct
 
-    let getCompletionsForTypes(statement:String, fsiAssembly:Assembly) : seq<String> = seq {
+    let getTypeCompletionsForReferencedAssemblies(statement:String, fsiAssembly:Assembly) : seq<String> = seq {
         for assemblyName in fsiAssembly.GetReferencedAssemblies() do
             //printfn "%s" assemblyName.FullName
             let matches = AppDomain.CurrentDomain.GetAssemblies() 
                             |> Seq.filter(fun a -> a.GetName().FullName = assemblyName.FullName)
             if matches |> Seq.isEmpty |> not then
                 let assembly = matches |> Seq.head
-                let assemblyTypeNames = getTypeCompletionsForAssembly(statement, assembly) 
+                let assemblyTypeNames = getCompletionsForTypes(statement, assembly.GetTypes()) 
                 yield! assemblyTypeNames
 
                 if statement.LastIndexOf('.') > 0 then
@@ -119,30 +121,32 @@ module AutocompleteProvider =
                         yield! memberNames
     }
 
-    let getCompletions(statement:String) : seq<String> =
+    let getCompletionsForAssembly(statement:String, fsiAssembly:Assembly) =
         seq {
-            let fsiAssembly = getFsiAssembly()
-            if fsiAssembly.IsSome then
-                yield! getCompletionsForTypes(statement, fsiAssembly.Value)
+            yield! getTypeCompletionsForReferencedAssemblies(statement, fsiAssembly)
 
-                if statement.LastIndexOf('.') < 0 then
-                    yield! getVariableNames(fsiAssembly.Value) |> Seq.filter(fun n -> n.StartsWith(statement))
-                    yield! getMethodNames(fsiAssembly.Value) |> Seq.filter(fun n -> n.StartsWith(statement))
-                else 
-                    let variables = getVariableNames(fsiAssembly.Value) |> Seq.filter(fun n -> n.StartsWith(getFirstSegment(statement)))
-                    if variables |> Seq.isEmpty then
-                        yield! variables // TODO take out methods and variables from this variable
-                    else
-                        let variable = variables |> Seq.head
-                        let typeOpt = getVariableTypeByName(fsiAssembly.Value, variable)
-                        if typeOpt.IsSome then
-                            let noFirstSegmentStatement = statement.Remove(0, variable.Length + 1)
-                            yield! getVariableNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement))
-                            yield! getMethodNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement))
+            if statement.LastIndexOf('.') < 0 then
+                yield! getVariableNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(statement))
+                yield! getMethodNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(statement))
+            else 
+                let variables = getVariableNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(getFirstSegment(statement)))
+                if variables |> Seq.isEmpty then
+                    yield! variables // TODO take out methods and variables from this variable
+                else
+                    let variable = variables |> Seq.head
+                    let typeOpt = getVariableTypeByName(fsiAssembly, variable)
+                    if typeOpt.IsSome then
+                        let noFirstSegmentStatement = statement.Remove(0, variable.Length + 1)
+                        yield! getVariableNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement))
+                        yield! getMethodNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement))
         } 
         |> Seq.distinct
         |> Seq.sort
 
-
-
-
+    let getCompletions(statement:String) : seq<String> = 
+        seq {
+            let fsiAssemblyOpt = getFsiAssembly()
+            if fsiAssemblyOpt.IsSome then
+                yield! getCompletionsForAssembly(statement, fsiAssemblyOpt.Value)
+        }
+    

@@ -12,6 +12,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharp.Interactive.Intellisense.Lib.Test", "FSharp.Interactive.Intellisense.Lib.Test\FSharp.Interactive.Intellisense.Lib.Test.fsproj", "{F032CD00-5650-482E-A69D-0C59761EC398}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F8AD5EDB-E571-42C1-B3D5-91D7D1D663FC}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +33,10 @@ Global
 		{0D841E3A-9F5E-4882-A95A-6ACF08BDE08A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D841E3A-9F5E-4882-A95A-6ACF08BDE08A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D841E3A-9F5E-4882-A95A-6ACF08BDE08A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F032CD00-5650-482E-A69D-0C59761EC398}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F032CD00-5650-482E-A69D-0C59761EC398}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F032CD00-5650-482E-A69D-0C59761EC398}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F032CD00-5650-482E-A69D-0C59761EC398}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

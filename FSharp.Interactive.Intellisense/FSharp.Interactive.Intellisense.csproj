@@ -87,6 +87,7 @@
     <Compile Include="FSharpCompletionHandlerProvider .cs" />
     <Compile Include="FSharpCompletionSource.cs" />
     <Compile Include="FSharpCompletionSourceProvider.cs" />
+    <Compile Include="FsiLanguageServiceHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

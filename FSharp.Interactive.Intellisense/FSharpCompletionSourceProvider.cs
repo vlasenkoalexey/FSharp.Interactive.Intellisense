@@ -17,6 +17,11 @@ namespace FSharp.Interactive.Intellisense
     internal class FSharpCompletionSourceProvider : ICompletionSourceProvider
     {
 
+        public FSharpCompletionSourceProvider() 
+        {
+
+        }
+
         [Import]
         internal ITextStructureNavigatorSelectorService NavigatorService { get; set; }
 

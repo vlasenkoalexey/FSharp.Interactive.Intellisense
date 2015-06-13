@@ -8,7 +8,6 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 using Microsoft.VisualStudio.Shell;
-using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using System.Reflection;
 using FSharp.Interactive.Intellisense.Lib;
 using System.Diagnostics;
@@ -27,48 +26,6 @@ namespace FSharp.Interactive.Intellisense
         {
             m_sourceProvider = sourceProvider;
             m_textBuffer = textBuffer;
-
-            Assembly fsiAssembly = Assembly.Load("FSharp.VS.FSI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
-            Type fsiLanguageServiceType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.FsiLanguageService");
-
-            Type sessionsType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session.Sessions");
-
-            Type fsiWindow = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
-
-            
-
-            
-
-            var providerGlobal = (IOleServiceProvider)Package.GetGlobalService(typeof(IOleServiceProvider));
-            var provider = new ServiceProvider(providerGlobal);
-            dynamic fsiLanguageService = ExposedObject.From(provider.GetService(fsiLanguageServiceType));
-            dynamic sessions = fsiLanguageService.sessions;
-            dynamic sessionsValue = ExposedObject.From(sessions).Value;
-            dynamic sessionR = ExposedObject.From(sessionsValue).sessionR;
-            dynamic sessionRValue = ExposedObject.From(sessionR).Value;
-            dynamic sessionRValueValue = ExposedObject.From(sessionRValue).Value;
-            MethodInfo methodInfo = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session+Session").GetMethods()[1];
-            dynamic fsiProcess = methodInfo.Invoke((Object)sessionRValueValue, null);
-
-            fsiProcess.Invoke(String.Format("#r \"{0}\";;", typeof(AutocompleteServer).Assembly.Location));
-            fsiProcess.Invoke("FSharp.Interactive.Intellisense.Lib.AutocompleteServer.StartServer(\"channel\");;");
-
-            var fsiTypes = fsiProcess.GetType().Assembly.GetTypes();
-            Assembly fsAssembly = fsiProcess.GetType().Assembly;
-
-
-            //dynamic r = sessionRValueValue.ProcessID;
-            //dynamic fsharpInteractiveService = ExposedObject.From(sessionRValueValue).client;
-            //fsharpInteractiveService.Interrupt();
-
-            //((Microsoft.VisualStudio.FSharp.Interactive.Session.createSessions@391-5)(sessions.Value)).sessionR.Value.Value
-
-            // TODO: figure out how to execute some script in F# interactive programatically
-            // TODO: figure out how FSI interactive service (server) is instantiated
-            // TODO: figure out how FSI interactive service (client) is used
-            // TODO: download VS FSI sources
-
-            
         }
 
         static bool IsWhiteSpaceOrDelimiter(char p)
@@ -87,13 +44,6 @@ namespace FSharp.Interactive.Intellisense
 
         void ICompletionSource.AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
         {
-            //var triggerPoint = session.GetTriggerPoint(m_textBuffer.CurrentSnapshot);
-            //if (triggerPoint == null)
-            //    return;
-
-            //var applicableTo1 = m_textBuffer.CurrentSnapshot.CreateTrackingSpan(new SnapshotSpan(triggerPoint.Value, 1), SpanTrackingMode.EdgeInclusive);
-
-
             ITextSnapshot snapshot = m_textBuffer.CurrentSnapshot;
             SnapshotPoint? triggerPoint = session.GetTriggerPoint(snapshot);
             if (triggerPoint == null)
@@ -137,9 +87,7 @@ namespace FSharp.Interactive.Intellisense
             {
                 try
                 {
-                    int result = autocomplteService.Test();
                     completions = autocomplteService.GetCompletions(statement);
-
                 }
                 catch (Exception ex)
                 {

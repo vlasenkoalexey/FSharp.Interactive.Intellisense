@@ -8,6 +8,7 @@ TODO:
 + Autocomplete popup control navigation
 + Autocomplete on variable methods (let cool = "blah"; cool. <- after dot)
 + UnitTests for AutocompleteProvider
+- Use FSI id on provider registration
 - Using unique Remoting channel
 - More clever registration (on FSI is reloaded or something like that)
 

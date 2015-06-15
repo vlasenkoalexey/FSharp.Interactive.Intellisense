@@ -13,6 +13,8 @@ TODO:
 - More clever registration (on FSI is reloaded or something like that)
 
 P2:
+- Autocomplte for printfn
+- Autocomplete for static variables System.Threading.CurrentThread. <- 
 - Autocomplete on Ctrl + tab
 - Autocomplete options through interactive
 - Add icons

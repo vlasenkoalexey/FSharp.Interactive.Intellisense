@@ -2,7 +2,9 @@
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reactive;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +18,6 @@ namespace FSharp.Interactive.Intellisense
         private Type fsiLanguageServiceType;
         private Type sessionsType;
         private Type fsiWindow;
-        private bool isRegistered;
         private System.Timers.Timer timer;
         private Object sessionCache;
 
@@ -26,7 +27,6 @@ namespace FSharp.Interactive.Intellisense
             fsiLanguageServiceType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.FsiLanguageService");
             sessionsType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session.Sessions");
             fsiWindow = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
-            isRegistered = false;
         }
 
         void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -42,12 +42,6 @@ namespace FSharp.Interactive.Intellisense
             }
         }
 
-        void sessionRestarted(object sender, System.EventArgs e)
-        {
-            this.isRegistered = false;
-            this.TryRegisterAutocompleteServer();
-        }
-
         private Object GetSession()
         {
             var providerGlobal = (IOleServiceProvider)Package.GetGlobalService(typeof(IOleServiceProvider));
@@ -61,20 +55,18 @@ namespace FSharp.Interactive.Intellisense
                 dynamic sessionRValue = ExposedObject.From(sessionR).Value;
                 dynamic sessionRValueValue = ExposedObject.From(sessionRValue).Value;
                 dynamic exitedE = ExposedObject.From(sessionRValueValue).exitedE;
-                //dynamic input = sessionRValueValue.Input;
-                //exitedE.Add(new EventHandler(sessionRestarted)); //TODO: figure out how to bind here
                 try
                 {
                     MethodInfo methodInfo = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session+Session").GetMethod("get_Exited");
                     IObservable<EventArgs> exited = methodInfo.Invoke(sessionRValueValue, null);
-                    //IObserver<int> obsvr = Observer.Create<int>(
-                    //    x => Console.WriteLine("OnNext: {0}", x),
-                    //    ex => Console.WriteLine("OnError: {0}", ex.Message),
-                    //    () => Console.WriteLine("OnCompleted"));
+                    IObserver<EventArgs> obsvr = Observer.Create<EventArgs>(
+                        x => { Debug.WriteLine("OnNext: {0}", x); },
+                        ex => { },
+                        () => { });
 
-                    //exited.Subscribe(complete => { };, ex => { };, () => { };);
+                    exited.Subscribe(obsvr);
                 }
-                catch(Exception ex)
+                catch
                 {
                 }
                 
@@ -109,20 +101,24 @@ namespace FSharp.Interactive.Intellisense
                 MethodInfo methodInfo = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session+Session").GetMethod("get_Input");
                 dynamic fsiProcess = methodInfo.Invoke((Object)sessionRValueValue, null);
 
-                fsiProcess.Invoke("(* Registering Autocomplete provider *);;");
+                fsiProcess.Invoke("printfn \"Registering Autocomplete provider\";;");
                 fsiProcess.Invoke(String.Format("#r \"{0}\";;", typeof(AutocompleteServer).Assembly.Location));
                 fsiProcess.Invoke("FSharp.Interactive.Intellisense.Lib.AutocompleteServer.StartServer(\"channel\");;");
                 returnValue = true;
 
-                // TODO: activate session
-                //try
-                //{
-                //    AutocompleteService autocomplteService = AutocompleteServer.StartClient("channel");
-                //    autocomplteService.Test();
-                //}
-                //catch (Exception ex)
-                //{
-                //}
+                System.Threading.Tasks.Task.Delay(2500).ContinueWith((t) =>
+                {
+                    // activate session
+                    try
+                    {
+                        AutocompleteService autocomplteService = AutocompleteServiceHelper.GetAutocompleteService();
+                        autocomplteService.Test();
+                    }
+                    catch
+                    {
+                    }
+                });
+
             }
 
             return returnValue;

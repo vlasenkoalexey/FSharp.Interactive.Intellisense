@@ -127,7 +127,7 @@ module AutocompleteProvider =
 
             if statement.LastIndexOf('.') < 0 then
                 yield! getVariableNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(statement))
-                yield! getMethodNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(statement))
+                // yield! getMethodNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(statement)) <- no method names since no variable is in the statement.
             else 
                 let variables = getVariableNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(getFirstSegment(statement), StringComparison.OrdinalIgnoreCase))
                 if variables |> Seq.isEmpty then

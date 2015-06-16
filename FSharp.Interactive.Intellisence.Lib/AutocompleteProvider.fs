@@ -28,18 +28,25 @@ module AutocompleteProvider =
         let lastStatmentDotIndex = statement.LastIndexOf('.')
         let nextDotIndex = line.IndexOf('.', lastStatmentDotIndex + 1)
         if nextDotIndex > 0 then
-            line.Substring(lastStatmentDotIndex + 1, nextDotIndex - (lastStatmentDotIndex + 1))
+            (line.Substring(lastStatmentDotIndex + 1, nextDotIndex - (lastStatmentDotIndex + 1)), false)
         else
-            line.Substring(lastStatmentDotIndex + 1)
+            (line.Substring(lastStatmentDotIndex + 1), true)
 
-    let getCompletionsForTypes(statement:String, types:seq<Type>) : IEnumerable<String> =
+    let getCompletionsForTypes(statement:String, types:seq<Type>) : IEnumerable<Completion> =
         let assemblyTypeNames = 
             types
             |> Seq.filter(fun t -> t.IsPublic)
-            |> Seq.map (fun t -> if t.FullName.LastIndexOf('`') > 0 then t.FullName.Remove(t.FullName.LastIndexOf('`')) else 
-                                    if FSharpType.IsModule(t) then t.FullName.Remove(t.FullName.Length - "Module".Length) else t.FullName) 
-            |> Seq.filter(fun t -> t.StartsWith(statement, StringComparison.OrdinalIgnoreCase))
-            |> Seq.map(fun n -> getLastSegment(statement, n))
+            |> Seq.map (fun t -> if t.FullName.LastIndexOf('`') > 0 then 
+                                        Completion(t.FullName.Remove(t.FullName.LastIndexOf('`')), CompletionType.Class) 
+                                    else 
+                                        if FSharpType.IsModule(t) then 
+                                            Completion(t.FullName.Remove(t.FullName.Length - "Module".Length), CompletionType.Module) 
+                                        else 
+                                            Completion(t.FullName, CompletionType.Class)) 
+            |> Seq.filter(fun c -> c.Text.StartsWith(statement, StringComparison.OrdinalIgnoreCase))
+            |> Seq.map(fun n -> 
+                                let (lastSegment, isLast) = getLastSegment(statement, n.Text)
+                                if isLast then Completion(lastSegment, n.CompletionType) else Completion(lastSegment, CompletionType.Namespace))
             |> Seq.distinct
         assemblyTypeNames
 
@@ -110,7 +117,7 @@ module AutocompleteProvider =
         |> Seq.map (fun mi -> if FSharpType.IsModule(t) then methodSourceName(mi) else mi.Name)
         |> Seq.distinct
 
-    let getTypeCompletionsForReferencedAssemblies(statement:String, fsiAssembly:Assembly) : seq<String> = seq {
+    let getTypeCompletionsForReferencedAssemblies(statement:String, fsiAssembly:Assembly) : seq<Completion> = seq {
         for assemblyName in fsiAssembly.GetReferencedAssemblies() do
             //printfn "%s" assemblyName.FullName
             let matches = AppDomain.CurrentDomain.GetAssemblies() 
@@ -125,7 +132,8 @@ module AutocompleteProvider =
                     let type_ = if assembly.GetType(typeName) = null then assembly.GetType(typeName + "Module") else assembly.GetType(typeName)
                     if not(type_ = null) then
                         let memberNames = getMethodNamesForType(type_)
-                        yield! memberNames
+                        let memberCompletions = memberNames |> Seq.map(fun n -> Completion(n, CompletionType.Method))
+                        yield! memberCompletions
     }
 
     let getCompletionsForAssembly(statement:String, fsiAssembly:Assembly) =
@@ -133,24 +141,32 @@ module AutocompleteProvider =
             yield! getTypeCompletionsForReferencedAssemblies(statement, fsiAssembly)
 
             if statement.LastIndexOf('.') < 0 then
-                yield! getVariableNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(statement))
+                yield! getVariableNames(fsiAssembly) 
+                        |> Seq.filter(fun n -> n.StartsWith(statement)) 
+                        |> Seq.map(fun n-> Completion(n, CompletionType.Variable))
                 // yield! getMethodNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(statement)) <- no method names since no variable is in the statement.
             else 
-                let variables = getVariableNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(getFirstSegment(statement), StringComparison.OrdinalIgnoreCase))
+                let variables = getVariableNames(fsiAssembly) 
+                                |> Seq.filter(fun n -> n.StartsWith(getFirstSegment(statement), StringComparison.OrdinalIgnoreCase))
+                                |> Seq.map(fun n-> Completion(n, CompletionType.Variable))
                 if variables |> Seq.isEmpty then
                     yield! variables // TODO take out methods and variables from this variable
                 else
-                    let variable = variables |> Seq.head
+                    let variable = (variables |> Seq.head).Text
                     let typeOpt = getVariableTypeByName(fsiAssembly, variable)
                     if typeOpt.IsSome then
                         let noFirstSegmentStatement = statement.Remove(0, variable.Length + 1)
-                        yield! getVariableNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement, StringComparison.OrdinalIgnoreCase))
-                        yield! getMethodNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement, StringComparison.OrdinalIgnoreCase))
+                        yield! getVariableNamesForType(typeOpt.Value) 
+                                |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement, StringComparison.OrdinalIgnoreCase))
+                                |> Seq.map(fun n-> Completion(n, CompletionType.Variable))
+                        yield! getMethodNamesForType(typeOpt.Value) 
+                                |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement, StringComparison.OrdinalIgnoreCase))
+                                |> Seq.map(fun n-> Completion(n, CompletionType.Method))
         } 
         |> Seq.distinct
         |> Seq.sort
 
-    let getCompletionsAndOpenDefaultNamespaces(statement:String, fsiAssembly:Assembly) : seq<String> = 
+    let getCompletionsAndOpenDefaultNamespaces(statement:String, fsiAssembly:Assembly) : seq<Completion> = 
         seq {
             yield! getCompletionsForAssembly(statement, fsiAssembly)
             yield! getCompletionsForAssembly("Microsoft.FSharp.Collections." + statement, fsiAssembly)
@@ -159,7 +175,7 @@ module AutocompleteProvider =
         |> Seq.distinct
         |> Seq.sort
 
-    let getCompletions(statement:String) : seq<String> = 
+    let getCompletions(statement:String) : seq<Completion> = 
         seq {
             let fsiAssemblyOpt = getFsiAssembly()
             if fsiAssemblyOpt.IsSome then

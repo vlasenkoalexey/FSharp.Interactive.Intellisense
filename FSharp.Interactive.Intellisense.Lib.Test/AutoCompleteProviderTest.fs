@@ -17,15 +17,16 @@ type UnitTest() =
 
     [<TestMethod>]
     member x.getLastSegment () = 
-        AutocompleteProvider.getLastSegment("foo.bar.b", "foo.bar.baz") |> should equal "baz"
+        AutocompleteProvider.getLastSegment("foo.bar.b", "foo.bar.baz") |> should equal ("baz", true)
+        AutocompleteProvider.getLastSegment("foo.ba", "foo.bar.baz") |> should equal ("bar", false)
 
     [<TestMethod>]
     member x.getCompletionsForTypes () = 
-        AutocompleteProvider.getCompletionsForTypes("Sys", typeof<String>.Assembly.GetTypes()) |> should contain "System"
-        AutocompleteProvider.getCompletionsForTypes("System.", typeof<String>.Assembly.GetTypes()) |> should contain "Object"
-        AutocompleteProvider.getCompletionsForTypes("System.D", typeof<String>.Assembly.GetTypes()) |> should contain "DateTime"
-        AutocompleteProvider.getCompletionsForTypes("System.date", typeof<String>.Assembly.GetTypes()) |> should contain "DateTime"
-        AutocompleteProvider.getCompletionsForTypes("Microsoft.FSharp.Core.Prin", typeof<Microsoft.FSharp.Core.unit>.Assembly.GetTypes()) |> should contain "Printf"
+        AutocompleteProvider.getCompletionsForTypes("Sys", typeof<String>.Assembly.GetTypes()) |> should contain (Completion("System", CompletionType.Namespace))
+        AutocompleteProvider.getCompletionsForTypes("System.", typeof<String>.Assembly.GetTypes()) |> should contain (Completion("Object", CompletionType.Class))
+        AutocompleteProvider.getCompletionsForTypes("System.D", typeof<String>.Assembly.GetTypes()) |> should contain (Completion("DateTime", CompletionType.Class))
+        AutocompleteProvider.getCompletionsForTypes("System.date", typeof<String>.Assembly.GetTypes()) |> should contain (Completion("DateTime", CompletionType.Class))
+        AutocompleteProvider.getCompletionsForTypes("Microsoft.FSharp.Core.Prin", typeof<Microsoft.FSharp.Core.unit>.Assembly.GetTypes()) |> should contain  (Completion("Printf", CompletionType.Module))
 
     [<TestMethod>]
     member x.removePropertyPrefix () = 
@@ -43,17 +44,17 @@ type UnitTest() =
     [<TestMethod>]
     member x.getCompletionsForAssembly () = 
         let assembly = x.GetType().Assembly
-        AutocompleteProvider.getCompletionsForAssembly("Sys", assembly) |> should contain "System"
-        AutocompleteProvider.getCompletionsForAssembly("System.C", assembly) |> should contain "Console"
-        AutocompleteProvider.getCompletionsForAssembly("System.con", assembly) |> should contain "Console"
-        AutocompleteProvider.getCompletionsForAssembly("System.Console.W", assembly) |> should contain "WriteLine"
+        AutocompleteProvider.getCompletionsForAssembly("Sys", assembly) |> should contain (Completion("System", CompletionType.Namespace))
+        AutocompleteProvider.getCompletionsForAssembly("System.C", assembly) |> should contain (Completion("Console", CompletionType.Class))
+        AutocompleteProvider.getCompletionsForAssembly("System.con", assembly) |> should contain (Completion("Console", CompletionType.Class))
+        AutocompleteProvider.getCompletionsForAssembly("System.Console.W", assembly) |> should contain  (Completion("WriteLine", CompletionType.Method))
 
     [<TestMethod>]
     member x.getTypeCompletionsForReferencedAssemblies () = 
-        AutocompleteProvider.getTypeCompletionsForReferencedAssemblies("Microsoft.FSharp.Core.Printf.p", x.GetType().Assembly) |> should contain "printfn"
+        AutocompleteProvider.getTypeCompletionsForReferencedAssemblies("Microsoft.FSharp.Core.Printf.p", x.GetType().Assembly) |> should contain (Completion("printfn", CompletionType.Method))
 
     [<TestMethod>]
     member x.getCompletionsAndOpenDefaultNamespaces () = 
-        AutocompleteProvider.getCompletionsAndOpenDefaultNamespaces("pr", x.GetType().Assembly) |> should contain "printfn"
+        AutocompleteProvider.getCompletionsAndOpenDefaultNamespaces("pr", x.GetType().Assembly) |> should contain (Completion("printfn", CompletionType.Method))
 
     

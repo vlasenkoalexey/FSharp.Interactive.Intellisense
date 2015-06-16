@@ -11,7 +11,8 @@ using Microsoft.VisualStudio.Shell;
 using System.Reflection;
 using FSharp.Interactive.Intellisense.Lib;
 using System.Diagnostics;
-
+using StatementCompletion = FSharp.Interactive.Intellisense.Lib.Completion;
+using Completion = Microsoft.VisualStudio.Language.Intellisense.Completion;
 
 namespace FSharp.Interactive.Intellisense
 {
@@ -81,7 +82,7 @@ namespace FSharp.Interactive.Intellisense
                 }
             }
 
-            IEnumerable<String> completions = new List<String>();
+            IEnumerable<Tuple<String, int>> completions = new List<Tuple<String, int>>();
             if (autocomplteService != null)
             {
                 try
@@ -96,11 +97,13 @@ namespace FSharp.Interactive.Intellisense
             
             compList = new List<Completion>();
             bool prependDot = statement.EndsWith(".");
-            var glyph = sourceProvider.GlyphService.GetGlyph(StandardGlyphGroup.GlyphGroupNamespace, 
-                StandardGlyphItem.GlyphItemPublic);
 
-            foreach (string str in completions)
+            foreach (Tuple<String, int> tuple in completions)
             {
+                StatementCompletion completion = StatementCompletion.FromTuple(tuple.Item1, tuple.Item2);
+                string str = completion.Text;
+                var glyph = sourceProvider.GlyphService.GetGlyph(CompletionTypeToStandardGlyphGroup(completion.CompletionType),
+                    StandardGlyphItem.GlyphItemPublic);
                 compList.Add(new Completion(str, prependDot ? "." + str : str, str, glyph, null));
             }
 
@@ -108,8 +111,8 @@ namespace FSharp.Interactive.Intellisense
                     session);
 
             CompletionSet completionSet = new CompletionSet(
-                "Tokens",    //the non-localized title of the tab 
-                "Tokens",    //the display title of the tab
+                "F# completions",    //the non-localized title of the tab 
+                "F# completions",    //the display title of the tab
                 applicableTo,
                 compList,
                 null);
@@ -119,6 +122,25 @@ namespace FSharp.Interactive.Intellisense
             //    Microsoft.VisualStudio.Language.Intellisense.CompletionMatchType.MatchInsertionText;
 
             completionSets.Add(completionSet);
+        }
+
+        private static StandardGlyphGroup CompletionTypeToStandardGlyphGroup(CompletionType completionType)
+        {
+            switch(completionType)
+            {
+                case CompletionType.Namespace:
+                    return StandardGlyphGroup.GlyphGroupNamespace;
+                case CompletionType.Class:
+                    return StandardGlyphGroup.GlyphGroupClass;
+                case CompletionType.Module:
+                    return StandardGlyphGroup.GlyphGroupModule;
+                case CompletionType.Method:
+                    return StandardGlyphGroup.GlyphGroupMethod;
+                case CompletionType.Variable:
+                    return StandardGlyphGroup.GlyphGroupVariable;
+                default:
+                    return StandardGlyphGroup.GlyphGroupUnknown;
+            }
         }
 
         private ITrackingSpan FindTokenSpanAtPosition(ITrackingPoint point, ICompletionSession session)

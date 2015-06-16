@@ -129,6 +129,7 @@ namespace FSharp.Interactive.Intellisense
                     {
                         AutocompleteService autocomplteService = AutocompleteClient.GetAutocompleteService();
                         autocomplteService.Ping();
+                        fsiProcess.Invoke("printfn \"Autocomplete provider registration complete\";;");
                     }
                     catch (Exception ex)
                     {

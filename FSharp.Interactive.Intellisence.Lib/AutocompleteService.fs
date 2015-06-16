@@ -12,4 +12,5 @@ type AutocompleteService() =
     inherit System.MarshalByRefObject()
     abstract Ping : unit -> bool
     abstract GetBaseDirectory : unit -> String
-    abstract GetCompletions: String -> String[]
+    // If I use any type from this assembly, Remoting crashes with "unable to find assembly" exception.
+    abstract GetCompletions: String -> (String * int)[] 

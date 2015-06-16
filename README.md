@@ -15,11 +15,11 @@ TODO:
 + Autocomplete for modules doesn't work -> use 
 CompilationSourceNameAttribute and FSharpType.IsModule
 http://stackoverflow.com/questions/4604139/how-to-get-the-f-name-of-a-module-function-etc-from-quoted-expression-match
-- Using unique Remoting channel
 + Auto open default namespaces -> make printfn or Seq. work by default
-- Add icons
++ Add icons
 https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039f35090e/PowerShellTools/Intellisense/PowerShellCompletionSource.cs
 - TODO: wrap fsiToolWindow into class
+- Using unique Remoting channel
 
 P2:
 - Autocomplete for static variables System.Threading.CurrentThread. <- 

@@ -21,7 +21,9 @@ type AutocompleteServer() =
     override x.GetBaseDirectory() = System.AppDomain.CurrentDomain.BaseDirectory
     override x.GetCompletions(statement:String) = 
         //Debugger.Break()
-        let results = AutocompleteProvider.getCompletions(statement) |> Seq.toArray
+        let results = AutocompleteProvider.getCompletions(statement) 
+                        |> Seq.map(fun e -> e.ToTuple())
+                        |> Seq.toArray
         results
     
     static member StartServer(channelName : string) = 
@@ -46,6 +48,6 @@ type AutocompleteServer() =
         //let T = Activator.GetObject(typeof<AutocompleteService>,"ipc://" + channelName + "/AutocompleteService") 
         let T = 
             Activator.GetObject
-                (typeof<AutocompleteService>, "ipc://FSharp.Interactive.Intellisense.Lib/AutocompleteService")
+                (typeof<AutocompleteServer>, "ipc://FSharp.Interactive.Intellisense.Lib/AutocompleteService")
         let x = T :?> AutocompleteService
         x

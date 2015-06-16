@@ -51,3 +51,9 @@ type UnitTest() =
     [<TestMethod>]
     member x.getTypeCompletionsForReferencedAssemblies () = 
         AutocompleteProvider.getTypeCompletionsForReferencedAssemblies("Microsoft.FSharp.Core.Printf.p", x.GetType().Assembly) |> should contain "printfn"
+
+    [<TestMethod>]
+    member x.getCompletionsAndOpenDefaultNamespaces () = 
+        AutocompleteProvider.getCompletionsAndOpenDefaultNamespaces("pr", x.GetType().Assembly) |> should contain "printfn"
+
+    

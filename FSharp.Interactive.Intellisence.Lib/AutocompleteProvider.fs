@@ -150,14 +150,19 @@ module AutocompleteProvider =
         |> Seq.distinct
         |> Seq.sort
 
+    let getCompletionsAndOpenDefaultNamespaces(statement:String, fsiAssembly:Assembly) : seq<String> = 
+        seq {
+            yield! getCompletionsForAssembly(statement, fsiAssembly)
+            yield! getCompletionsForAssembly("Microsoft.FSharp.Collections." + statement, fsiAssembly)
+            yield! getCompletionsForAssembly("Microsoft.FSharp.Core.Printf." + statement, fsiAssembly)
+        }
+        |> Seq.distinct
+        |> Seq.sort
+
     let getCompletions(statement:String) : seq<String> = 
         seq {
             let fsiAssemblyOpt = getFsiAssembly()
             if fsiAssemblyOpt.IsSome then
-                yield! getCompletionsForAssembly(statement, fsiAssemblyOpt.Value)
-                yield! getCompletionsForAssembly("Microsoft.FSharp.Collections." + statement, fsiAssemblyOpt.Value)
-                yield! getCompletionsForAssembly("Microsoft.FSharp.Core.Printf." + statement, fsiAssemblyOpt.Value)
+                yield! getCompletionsAndOpenDefaultNamespaces(statement, fsiAssemblyOpt.Value)
         }
-        |> Seq.distinct
-        |> Seq.sort
     

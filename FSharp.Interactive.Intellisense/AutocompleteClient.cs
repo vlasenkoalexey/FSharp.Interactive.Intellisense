@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FSharp.Interactive.Intellisense
 {
-    public class AutocompleteServiceHelper
+    public class AutocompleteClient
     {
         private static volatile AutocompleteService autocompleteService;
         private static Object syncRoot = new object();

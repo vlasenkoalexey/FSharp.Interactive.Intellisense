@@ -111,7 +111,7 @@ namespace FSharp.Interactive.Intellisense
                     // activate session
                     try
                     {
-                        AutocompleteService autocomplteService = AutocompleteServiceHelper.GetAutocompleteService();
+                        AutocompleteService autocomplteService = AutocompleteClient.GetAutocompleteService();
                         autocomplteService.Test();
                     }
                     catch

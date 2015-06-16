@@ -73,7 +73,7 @@ namespace FSharp.Interactive.Intellisense
             {
                 try
                 {
-                    autocomplteService = AutocompleteServiceHelper.GetAutocompleteService();
+                    autocomplteService = AutocompleteClient.GetAutocompleteService();
 
                 }
                 catch (Exception ex)

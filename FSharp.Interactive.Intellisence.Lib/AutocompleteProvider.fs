@@ -5,6 +5,7 @@ module AutocompleteProvider =
     open System
     open System.Collections.Generic
     open System.Reflection
+    open Microsoft.FSharp.Reflection
 
     // Returns first segment foo.bar -> foo
     let getFirstSegment(statement:String) =
@@ -35,7 +36,8 @@ module AutocompleteProvider =
         let assemblyTypeNames = 
             types
             |> Seq.filter(fun t -> t.IsPublic)
-            |> Seq.map (fun t -> if t.FullName.LastIndexOf('`') > 0 then t.FullName.Remove(t.FullName.LastIndexOf('`')) else t.FullName) 
+            |> Seq.map (fun t -> if t.FullName.LastIndexOf('`') > 0 then t.FullName.Remove(t.FullName.LastIndexOf('`')) else 
+                                    if FSharpType.IsModule(t) then t.FullName.Remove(t.FullName.Length - "Module".Length) else t.FullName) 
             |> Seq.filter(fun t -> t.StartsWith(statement, StringComparison.OrdinalIgnoreCase))
             |> Seq.map(fun n -> getLastSegment(statement, n))
             |> Seq.distinct
@@ -95,9 +97,17 @@ module AutocompleteProvider =
         |> Seq.map (fun mi -> mi.Name)
         |> Seq.distinct
 
+    let methodSourceName (mi:MemberInfo) =
+        mi.GetCustomAttributes(true)
+        |> Array.tryPick 
+                (function
+                    | :? CompilationSourceNameAttribute as csna -> Some(csna)
+                    | _ -> None)
+        |> (function | Some(csna) -> csna.SourceName | None -> mi.Name)
+
     let getMethodNamesForType(t:Type) =
         getMethodInfosForType(t)
-        |> Seq.map (fun mi -> mi.Name)
+        |> Seq.map (fun mi -> if FSharpType.IsModule(t) then methodSourceName(mi) else mi.Name)
         |> Seq.distinct
 
     let getTypeCompletionsForReferencedAssemblies(statement:String, fsiAssembly:Assembly) : seq<String> = seq {
@@ -112,12 +122,9 @@ module AutocompleteProvider =
 
                 if statement.LastIndexOf('.') > 0 then
                     let typeName = statement.Remove(statement.LastIndexOf('.'))
-                    let type_ = assembly.GetType(typeName)
+                    let type_ = if assembly.GetType(typeName) = null then assembly.GetType(typeName + "Module") else assembly.GetType(typeName)
                     if not(type_ = null) then
-                        let memberNames = type_.GetMembers(BindingFlags.Instance ||| BindingFlags.Static ||| BindingFlags.FlattenHierarchy ||| BindingFlags.Public)
-                                            |> Seq.map(fun m -> removePropertyPrefix m.Name)
-                                            |> Seq.filter (fun name -> name.StartsWith(getLastPartialSegment(statement), StringComparison.OrdinalIgnoreCase)) 
-                                            |> Seq.distinct
+                        let memberNames = getMethodNamesForType(type_)
                         yield! memberNames
     }
 

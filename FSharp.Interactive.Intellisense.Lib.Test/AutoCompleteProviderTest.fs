@@ -25,6 +25,7 @@ type UnitTest() =
         AutocompleteProvider.getCompletionsForTypes("System.", typeof<String>.Assembly.GetTypes()) |> should contain "Object"
         AutocompleteProvider.getCompletionsForTypes("System.D", typeof<String>.Assembly.GetTypes()) |> should contain "DateTime"
         AutocompleteProvider.getCompletionsForTypes("System.date", typeof<String>.Assembly.GetTypes()) |> should contain "DateTime"
+        AutocompleteProvider.getCompletionsForTypes("Microsoft.FSharp.Core.Prin", typeof<Microsoft.FSharp.Core.unit>.Assembly.GetTypes()) |> should contain "Printf"
 
     [<TestMethod>]
     member x.removePropertyPrefix () = 
@@ -46,3 +47,7 @@ type UnitTest() =
         AutocompleteProvider.getCompletionsForAssembly("System.C", assembly) |> should contain "Console"
         AutocompleteProvider.getCompletionsForAssembly("System.con", assembly) |> should contain "Console"
         AutocompleteProvider.getCompletionsForAssembly("System.Console.W", assembly) |> should contain "WriteLine"
+
+    [<TestMethod>]
+    member x.getTypeCompletionsForReferencedAssemblies () = 
+        AutocompleteProvider.getTypeCompletionsForReferencedAssemblies("Microsoft.FSharp.Core.Printf.p", x.GetType().Assembly) |> should contain "printfn"

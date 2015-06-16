@@ -87,7 +87,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutocompleteServiceHelper.cs" />
+    <Compile Include="AutocompleteClient.cs" />
     <Compile Include="ExposedObject.cs" />
     <Compile Include="ExposedObjectHelper.cs" />
     <Compile Include="FSharpCompletionCommandHandler.cs" />

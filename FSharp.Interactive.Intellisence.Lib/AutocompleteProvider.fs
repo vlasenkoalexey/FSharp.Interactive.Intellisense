@@ -155,5 +155,9 @@ module AutocompleteProvider =
             let fsiAssemblyOpt = getFsiAssembly()
             if fsiAssemblyOpt.IsSome then
                 yield! getCompletionsForAssembly(statement, fsiAssemblyOpt.Value)
+                yield! getCompletionsForAssembly("Microsoft.FSharp.Collections." + statement, fsiAssemblyOpt.Value)
+                yield! getCompletionsForAssembly("Microsoft.FSharp.Core.Printf." + statement, fsiAssemblyOpt.Value)
         }
+        |> Seq.distinct
+        |> Seq.sort
     

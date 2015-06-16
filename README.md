@@ -12,7 +12,7 @@ TODO:
 + Use FSI id on provider registration - it is not possible, using FSI filter to identify if TextView is a correct one
 + More clever registration (on FSI is reloaded or something like that)
 + Why do I see ToString in default completions - fixed
-- Autocomplete for modules doesn't work -> use 
++ Autocomplete for modules doesn't work -> use 
 CompilationSourceNameAttribute and FSharpType.IsModule
 http://stackoverflow.com/questions/4604139/how-to-get-the-f-name-of-a-module-function-etc-from-quoted-expression-match
 - Using unique Remoting channel

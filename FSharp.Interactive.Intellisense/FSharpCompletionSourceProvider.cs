@@ -23,6 +23,9 @@ namespace FSharp.Interactive.Intellisense
         [Import]
         internal ITextStructureNavigatorSelectorService NavigatorService { get; set; }
 
+        [Import]
+        internal IGlyphService GlyphService { get; set; }
+
         public ICompletionSource TryCreateCompletionSource(ITextBuffer textBuffer)
         {
             return new FSharpCompletionSource(this, textBuffer);

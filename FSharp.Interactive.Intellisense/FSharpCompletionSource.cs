@@ -96,8 +96,13 @@ namespace FSharp.Interactive.Intellisense
             
             compList = new List<Completion>();
             bool prependDot = statement.EndsWith(".");
+            var glyph = sourceProvider.GlyphService.GetGlyph(StandardGlyphGroup.GlyphGroupNamespace, 
+                StandardGlyphItem.GlyphItemPublic);
+
             foreach (string str in completions)
-                compList.Add(new Completion(str, prependDot ? "." + str : str, str, null, null));
+            {
+                compList.Add(new Completion(str, prependDot ? "." + str : str, str, glyph, null));
+            }
 
             var applicableTo = FindTokenSpanAtPosition(session.GetTriggerPoint(textBuffer),
                     session);

@@ -43,7 +43,6 @@
     <Reference Include="System.Runtime.Remoting" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library1.fs" />
     <None Include="Script.fsx" />
     <Compile Include="AutocompleteProvider.fs" />
     <Compile Include="AutocompleteService.fs" />

@@ -128,7 +128,7 @@ namespace FSharp.Interactive.Intellisense
                     try
                     {
                         AutocompleteService autocomplteService = AutocompleteClient.GetAutocompleteService();
-                        autocomplteService.Test();
+                        autocomplteService.Ping();
                     }
                     catch (Exception ex)
                     {

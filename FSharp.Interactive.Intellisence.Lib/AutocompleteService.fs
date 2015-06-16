@@ -10,6 +10,6 @@ open System.Runtime.Remoting.Lifetime
 [<Serializable>]
 type AutocompleteService() = 
     inherit System.MarshalByRefObject()
-    abstract Test : unit -> int
+    abstract Ping : unit -> bool
     abstract GetBaseDirectory : unit -> String
     abstract GetCompletions: String -> String[]

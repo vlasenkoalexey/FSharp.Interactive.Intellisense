@@ -17,7 +17,7 @@ type AutocompleteServer() =
 
     do AppDomain.CurrentDomain.add_AssemblyResolve(fun obj arg -> Debug.WriteLine "Resolving FSharp.Interactive.Intellisense.dll"; typeof<AutocompleteServer>.Assembly)
 
-    override x.Test() = 5
+    override x.Ping() = true
     override x.GetBaseDirectory() = System.AppDomain.CurrentDomain.BaseDirectory
     override x.GetCompletions(statement:String) = 
         //Debugger.Break()

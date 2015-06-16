@@ -36,7 +36,7 @@ module AutocompleteProvider =
             types
             |> Seq.filter(fun t -> t.IsPublic)
             |> Seq.map (fun t -> if t.FullName.LastIndexOf('`') > 0 then t.FullName.Remove(t.FullName.LastIndexOf('`')) else t.FullName) 
-            |> Seq.filter(fun t -> t.StartsWith(statement))
+            |> Seq.filter(fun t -> t.StartsWith(statement, StringComparison.OrdinalIgnoreCase))
             |> Seq.map(fun n -> getLastSegment(statement, n))
             |> Seq.distinct
         assemblyTypeNames
@@ -116,7 +116,7 @@ module AutocompleteProvider =
                     if not(type_ = null) then
                         let memberNames = type_.GetMembers(BindingFlags.Instance ||| BindingFlags.Static ||| BindingFlags.FlattenHierarchy ||| BindingFlags.Public)
                                             |> Seq.map(fun m -> removePropertyPrefix m.Name)
-                                            |> Seq.filter (fun name -> name.StartsWith(getLastPartialSegment(statement))) 
+                                            |> Seq.filter (fun name -> name.StartsWith(getLastPartialSegment(statement), StringComparison.OrdinalIgnoreCase)) 
                                             |> Seq.distinct
                         yield! memberNames
     }
@@ -129,7 +129,7 @@ module AutocompleteProvider =
                 yield! getVariableNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(statement))
                 yield! getMethodNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(statement))
             else 
-                let variables = getVariableNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(getFirstSegment(statement)))
+                let variables = getVariableNames(fsiAssembly) |> Seq.filter(fun n -> n.StartsWith(getFirstSegment(statement), StringComparison.OrdinalIgnoreCase))
                 if variables |> Seq.isEmpty then
                     yield! variables // TODO take out methods and variables from this variable
                 else
@@ -137,8 +137,8 @@ module AutocompleteProvider =
                     let typeOpt = getVariableTypeByName(fsiAssembly, variable)
                     if typeOpt.IsSome then
                         let noFirstSegmentStatement = statement.Remove(0, variable.Length + 1)
-                        yield! getVariableNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement))
-                        yield! getMethodNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement))
+                        yield! getVariableNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement, StringComparison.OrdinalIgnoreCase))
+                        yield! getMethodNamesForType(typeOpt.Value) |> Seq.filter(fun n -> n.StartsWith(noFirstSegmentStatement, StringComparison.OrdinalIgnoreCase))
         } 
         |> Seq.distinct
         |> Seq.sort

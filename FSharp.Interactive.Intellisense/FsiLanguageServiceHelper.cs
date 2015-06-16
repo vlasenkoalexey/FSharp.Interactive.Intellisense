@@ -14,10 +14,12 @@ namespace FSharp.Interactive.Intellisense
 {
     internal class FsiLanguageServiceHelper
     {
+        public const string FsiToolWindowClassName = "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow";
+
         private Assembly fsiAssembly;
         private Type fsiLanguageServiceType;
         private Type sessionsType;
-        private Type fsiWindow;
+        private Type fsiWindowType;
         private System.Timers.Timer timer;
         private Object sessionCache;
 
@@ -26,7 +28,7 @@ namespace FSharp.Interactive.Intellisense
             fsiAssembly = Assembly.Load("FSharp.VS.FSI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             fsiLanguageServiceType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.FsiLanguageService");
             sessionsType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session.Sessions");
-            fsiWindow = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
+            fsiWindowType = fsiAssembly.GetType(FsiToolWindowClassName);
         }
 
         void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)

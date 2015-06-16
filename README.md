@@ -8,6 +8,8 @@ TODO:
 + Autocomplete popup control navigation
 + Autocomplete on variable methods (let cool = "blah"; cool. <- after dot)
 + UnitTests for AutocompleteProvider
++ Case insensitive autcomplete
+- Why do I see ToString in default completions?
 - Use FSI id on provider registration
 - Using unique Remoting channel
 - More clever registration (on FSI is reloaded or something like that)

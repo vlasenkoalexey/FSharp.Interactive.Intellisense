@@ -38,7 +38,8 @@ namespace FSharp.Interactive.Intellisense
 
             Task.Delay(2000).ContinueWith((a) =>
             {
-                this.fsiToolWindow = CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter), "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
+                this.fsiToolWindow = CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter), 
+                    FsiLanguageServiceHelper.FsiToolWindowClassName);
             });
 
             this.textViewAdapter = textViewAdapter;
@@ -52,10 +53,6 @@ namespace FSharp.Interactive.Intellisense
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            IOleCommandTarget fsiToolWindowFilter =
-                CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter),
-                    "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow");
-
             if (VsShellUtilities.IsInAutomationFunction(m_provider.ServiceProvider))
             {
                 return m_nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);

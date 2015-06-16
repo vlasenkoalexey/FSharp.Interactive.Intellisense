@@ -24,6 +24,7 @@ type UnitTest() =
         AutocompleteProvider.getCompletionsForTypes("Sys", typeof<String>.Assembly.GetTypes()) |> should contain "System"
         AutocompleteProvider.getCompletionsForTypes("System.", typeof<String>.Assembly.GetTypes()) |> should contain "Object"
         AutocompleteProvider.getCompletionsForTypes("System.D", typeof<String>.Assembly.GetTypes()) |> should contain "DateTime"
+        AutocompleteProvider.getCompletionsForTypes("System.date", typeof<String>.Assembly.GetTypes()) |> should contain "DateTime"
 
     [<TestMethod>]
     member x.removePropertyPrefix () = 
@@ -43,4 +44,5 @@ type UnitTest() =
         let assembly = x.GetType().Assembly
         AutocompleteProvider.getCompletionsForAssembly("Sys", assembly) |> should contain "System"
         AutocompleteProvider.getCompletionsForAssembly("System.C", assembly) |> should contain "Console"
+        AutocompleteProvider.getCompletionsForAssembly("System.con", assembly) |> should contain "Console"
         AutocompleteProvider.getCompletionsForAssembly("System.Console.W", assembly) |> should contain "WriteLine"

@@ -13,13 +13,11 @@ namespace FSharp.Interactive.Intellisense
 {
     [Export(typeof(ICompletionSourceProvider))]
     [ContentType("any")]
-    [Name("token completion handler")]
+    [Name("F# completion handler")]
     internal class FSharpCompletionSourceProvider : ICompletionSourceProvider
     {
-
         public FSharpCompletionSourceProvider() 
         {
-
         }
 
         [Import]

@@ -38,7 +38,8 @@ namespace FSharp.Interactive.Intellisense
 
             Task.Delay(2000).ContinueWith((a) =>
             {
-                this.fsiToolWindow = CommandChainNodeWrapper.GetFilterByFullClassName(new CommandChainNodeWrapper(textViewAdapter), 
+                // Probably it is possible to find it through package as well.
+                this.fsiToolWindow = CommandChainNodeWrapper.GetFilterByFullClassName(textViewAdapter, 
                     FsiLanguageServiceHelper.FsiToolWindowClassName);
             });
 

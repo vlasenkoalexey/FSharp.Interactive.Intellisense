@@ -17,15 +17,14 @@ namespace FSharp.Interactive.Intellisense
 {
     internal class FSharpCompletionSource : ICompletionSource
     {
-        private FSharpCompletionSourceProvider m_sourceProvider;
-        private ITextBuffer m_textBuffer;
-        private List<Completion> m_compList;
-
+        private FSharpCompletionSourceProvider sourceProvider;
+        private ITextBuffer textBuffer;
+        private List<Completion> compList;
 
         public FSharpCompletionSource(FSharpCompletionSourceProvider sourceProvider, ITextBuffer textBuffer)
         {
-            m_sourceProvider = sourceProvider;
-            m_textBuffer = textBuffer;
+            this.sourceProvider = sourceProvider;
+            this.textBuffer = textBuffer;
         }
 
         static bool IsWhiteSpaceOrDelimiter(char p)
@@ -44,7 +43,7 @@ namespace FSharp.Interactive.Intellisense
 
         void ICompletionSource.AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
         {
-            ITextSnapshot snapshot = m_textBuffer.CurrentSnapshot;
+            ITextSnapshot snapshot = textBuffer.CurrentSnapshot;
             SnapshotPoint? triggerPoint = session.GetTriggerPoint(snapshot);
             if (triggerPoint == null)
             {
@@ -95,19 +94,19 @@ namespace FSharp.Interactive.Intellisense
                 }
             }            
             
-            m_compList = new List<Completion>();
+            compList = new List<Completion>();
             bool prependDot = statement.EndsWith(".");
             foreach (string str in completions)
-                m_compList.Add(new Completion(str, prependDot ? "." + str : str, str, null, null));
+                compList.Add(new Completion(str, prependDot ? "." + str : str, str, null, null));
 
-            var applicableTo = FindTokenSpanAtPosition(session.GetTriggerPoint(m_textBuffer),
+            var applicableTo = FindTokenSpanAtPosition(session.GetTriggerPoint(textBuffer),
                     session);
 
             CompletionSet completionSet = new CompletionSet(
                 "Tokens",    //the non-localized title of the tab 
                 "Tokens",    //the display title of the tab
                 applicableTo,
-                m_compList,
+                compList,
                 null);
 
             // Following code doesn't work:
@@ -120,7 +119,7 @@ namespace FSharp.Interactive.Intellisense
         private ITrackingSpan FindTokenSpanAtPosition(ITrackingPoint point, ICompletionSession session)
         {
             SnapshotPoint currentPoint = (session.TextView.Caret.Position.BufferPosition) - 1;
-            ITextStructureNavigator navigator = m_sourceProvider.NavigatorService.GetTextStructureNavigator(m_textBuffer);
+            ITextStructureNavigator navigator = sourceProvider.NavigatorService.GetTextStructureNavigator(textBuffer);
             TextExtent extent = navigator.GetExtentOfWord(currentPoint);
             //TextExtent extent = navigator.get(currentPoint);
             return currentPoint.Snapshot.CreateTrackingSpan(extent.Span, SpanTrackingMode.EdgeInclusive);

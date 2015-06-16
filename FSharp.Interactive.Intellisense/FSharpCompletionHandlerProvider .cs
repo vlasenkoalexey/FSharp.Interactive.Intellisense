@@ -14,9 +14,9 @@ using System.Threading.Tasks;
 namespace FSharp.Interactive.Intellisense
 {
     [Export(typeof(IVsTextViewCreationListener))]
-    [Name("token completion")]
-    [ContentType("any")]
-    [TextViewRole(PredefinedTextViewRoles.Analyzable)] // TODO: use FSI window id here
+    [Name("F# completion")]
+    [ContentType("any")] // F# and FSharpInteractive do not work here.
+    [TextViewRole(PredefinedTextViewRoles.Interactive)]
     internal class FSharpCompletionHandlerProvider : IVsTextViewCreationListener
     {
         [Import]
@@ -25,6 +25,8 @@ namespace FSharp.Interactive.Intellisense
         internal ICompletionBroker CompletionBroker { get; set; }
         [Import]
         internal SVsServiceProvider ServiceProvider { get; set; }
+        [Import]
+        internal IContentTypeRegistryService ContentTypeRegistryService { get; set; }
 
         public void VsTextViewCreated(IVsTextView textViewAdapter)
         {
@@ -32,6 +34,12 @@ namespace FSharp.Interactive.Intellisense
             if (textView == null)
             {
                 return;
+            }
+
+            var fsiViewFilter = CommandChainNodeWrapper.GetFilterByFullClassName(textViewAdapter, FsiLanguageServiceHelper.FsiViewFilterClassName);
+            if (fsiViewFilter == null)
+            {
+                return; // I didn't find a btter way to figure out if this IVsTextView is indeed F# interactive.
             }
 
             FsiLanguageServiceHelper fsiLanguageServiceHelper = new FsiLanguageServiceHelper();

@@ -38,19 +38,20 @@ namespace FSharp.Interactive.Intellisense
 
         private dynamic commandChainNode;
 
-        public CommandChainNodeWrapper(Object commandChainNode)
+        private CommandChainNodeWrapper(Object commandChainNode)
         {
             this.commandChainNode = ExposedObject.From(commandChainNode);
         }
 
-        public CommandChainNodeWrapper(IVsTextView textAdapter)
+        private CommandChainNodeWrapper(IVsTextView textAdapter)
         {
             FieldInfo commandChainFieldInfo = textAdapter.GetType().BaseType.GetField("_commandChain", BindingFlags.NonPublic | BindingFlags.Instance);
             this.commandChainNode = new CommandChainNodeWrapper(commandChainFieldInfo.GetValue(textAdapter));
         }
 
-        public static IOleCommandTarget GetFilterByFullClassName(CommandChainNodeWrapper commandChainWrapper, string className)
+        public static IOleCommandTarget GetFilterByFullClassName(IVsTextView textAdapter, string className)
         {
+            CommandChainNodeWrapper commandChainWrapper = new CommandChainNodeWrapper(textAdapter);
             return GetFilterByFullClassName(commandChainWrapper, className, 0);
         }
 

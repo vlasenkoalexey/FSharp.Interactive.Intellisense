@@ -14,7 +14,9 @@ namespace FSharp.Interactive.Intellisense
 {
     internal class FsiLanguageServiceHelper
     {
+        // https://github.com/Microsoft/visualfsharp/blob/275b832e9dd1a4bd64ed3accd218384b901be1d2/vsintegration/src/vs/FsPkgs/FSharp.VS.FSI/fsiSessionToolWindow.fs
         public const string FsiToolWindowClassName = "Microsoft.VisualStudio.FSharp.Interactive.FsiToolWindow";
+        public const string FsiViewFilterClassName = "Microsoft.VisualStudio.FSharp.Interactive.FsiViewFilter";
 
         private Assembly fsiAssembly;
         private Type fsiLanguageServiceType;
@@ -29,19 +31,6 @@ namespace FSharp.Interactive.Intellisense
             fsiLanguageServiceType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.FsiLanguageService");
             sessionsType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session.Sessions");
             fsiWindowType = fsiAssembly.GetType(FsiToolWindowClassName);
-        }
-
-        void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            try
-            {
-                timer.Stop();
-                TryRegisterAutocompleteServer();
-            }
-            finally
-            {
-                timer.Start();
-            }
         }
 
         private Object GetSession()
@@ -62,14 +51,15 @@ namespace FSharp.Interactive.Intellisense
                     MethodInfo methodInfo = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session+Session").GetMethod("get_Exited");
                     IObservable<EventArgs> exited = methodInfo.Invoke(sessionRValueValue, null);
                     IObserver<EventArgs> obsvr = Observer.Create<EventArgs>(
-                        x => { Debug.WriteLine("OnNext: {0}", x); },
+                        x => { RegisterAutocompleteServer(); },
                         ex => { },
                         () => { });
 
                     exited.Subscribe(obsvr);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Debug.WriteLine(ex);
                 }
                 
                 return sessionRValueValue;
@@ -89,6 +79,30 @@ namespace FSharp.Interactive.Intellisense
             else
             {
                 timer.Start();
+            }
+        }
+
+        void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            RegisterAutocompleteServer();
+        }
+
+        private void RegisterAutocompleteServer()
+        {
+            try
+            {
+                if (timer != null)
+                {
+                    timer.Stop();
+                }
+                TryRegisterAutocompleteServer();
+            }
+            finally
+            {
+                if (timer != null)
+                {
+                    timer.Start();
+                }
             }
         }
 
@@ -116,8 +130,9 @@ namespace FSharp.Interactive.Intellisense
                         AutocompleteService autocomplteService = AutocompleteClient.GetAutocompleteService();
                         autocomplteService.Test();
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Debug.WriteLine(ex);
                     }
                 });
 

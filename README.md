@@ -10,7 +10,7 @@ TODO:
 + UnitTests for AutocompleteProvider
 + Case insensitive autcomplete
 - Why do I see ToString in default completions?
-- Use FSI id on provider registration
++ Use FSI id on provider registration - it is not possible, using FSI filter to identify if TextView is a correct one
 - Using unique Remoting channel
 - More clever registration (on FSI is reloaded or something like that)
 

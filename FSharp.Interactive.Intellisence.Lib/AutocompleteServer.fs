@@ -30,29 +30,30 @@ type AutocompleteServer() =
     static member ipcChannelEndpoint = "AutocompleteService"
 
     static member StartServer(channelId : int) = 
-        let channel = new IpcServerChannel(AutocompleteServer.ipcChannelName) // TODO: make it unique
+        let channel = new IpcServerChannel(sprintf "%s_%d"AutocompleteServer.ipcChannelName channelId)
+        Debug.WriteLine(sprintf "Registering ipc://%s_%d/%s server endpoint" 
+            AutocompleteServer.ipcChannelName channelId AutocompleteServer.ipcChannelEndpoint)
         //Register the server channel.
         ChannelServices.RegisterChannel(channel, false)
         RemotingConfiguration.RegisterWellKnownServiceType(typeof<AutocompleteServer>, 
-            (sprintf "%s_%d" AutocompleteServer.ipcChannelEndpoint channelId), 
+            AutocompleteServer.ipcChannelEndpoint, 
             WellKnownObjectMode.Singleton)
-        Debug.WriteLine(sprintf "Registered ipc://%s/%s_%d server endpoint" 
-            AutocompleteServer.ipcChannelName AutocompleteServer.ipcChannelEndpoint channelId)
     
     static member StartClient(channelId: int) = 
+        Debug.WriteLine(sprintf "Registering ipc://%s_%d/%s client endpoint" 
+            AutocompleteServer.ipcChannelName channelId AutocompleteServer.ipcChannelEndpoint)
+        let channelUri = sprintf "ipc://%s_%d/%s" AutocompleteServer.ipcChannelName channelId AutocompleteServer.ipcChannelEndpoint
         try 
             let channel = new IpcClientChannel()
             //Register the channel with ChannelServices.
             ChannelServices.RegisterChannel(channel, false)
+                        //Register the client type.
+            RemotingConfiguration.RegisterWellKnownClientType
+                (typeof<AutocompleteServer>, channelUri)
         with 
             | _ -> ()
 
-        let channelUri = sprintf "ipc://%s/%s_%d" AutocompleteServer.ipcChannelName AutocompleteServer.ipcChannelEndpoint channelId
-        //Register the client type.
-        RemotingConfiguration.RegisterWellKnownClientType
-            (typeof<AutocompleteServer>, channelUri)
-        let T = 
-            Activator.GetObject
-                (typeof<AutocompleteServer>, channelUri)
+
+        let T = Activator.GetObject(typeof<AutocompleteServer>, channelUri)
         let x = T :?> AutocompleteService
         x

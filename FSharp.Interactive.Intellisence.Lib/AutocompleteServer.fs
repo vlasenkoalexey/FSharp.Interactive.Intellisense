@@ -20,21 +20,26 @@ type AutocompleteServer() =
     override x.Ping() = true
     override x.GetBaseDirectory() = System.AppDomain.CurrentDomain.BaseDirectory
     override x.GetCompletions(statement:String) = 
-        //Debugger.Break()
         let results = AutocompleteProvider.getCompletions(statement) 
                         |> Seq.map(fun e -> e.ToTuple())
                         |> Seq.toArray
         results
-    
-    static member StartServer(channelName : string) = 
-        let channel = new IpcServerChannel("FSharp.Interactive.Intellisense.Lib") // TODO: make it unique
+
+
+    static member ipcChannelName = "FSharp.Interactive.Intellisense.Lib"
+    static member ipcChannelEndpoint = "AutocompleteService"
+
+    static member StartServer(channelId : int) = 
+        let channel = new IpcServerChannel(AutocompleteServer.ipcChannelName) // TODO: make it unique
         //Register the server channel.
         ChannelServices.RegisterChannel(channel, false)
-        Debug.WriteLine("Registered FSharp.Interactive.Intellisense.Lib channel")
-        RemotingConfiguration.RegisterWellKnownServiceType
-            (typeof<AutocompleteServer>, "AutocompleteService", WellKnownObjectMode.Singleton)
+        RemotingConfiguration.RegisterWellKnownServiceType(typeof<AutocompleteServer>, 
+            (sprintf "%s_%d" AutocompleteServer.ipcChannelEndpoint channelId), 
+            WellKnownObjectMode.Singleton)
+        Debug.WriteLine(sprintf "Registered ipc://%s/%s_%d server endpoint" 
+            AutocompleteServer.ipcChannelName AutocompleteServer.ipcChannelEndpoint channelId)
     
-    static member StartClient(channelName) = 
+    static member StartClient(channelId: int) = 
         try 
             let channel = new IpcClientChannel()
             //Register the channel with ChannelServices.
@@ -42,12 +47,12 @@ type AutocompleteServer() =
         with 
             | _ -> ()
 
+        let channelUri = sprintf "ipc://%s/%s_%d" AutocompleteServer.ipcChannelName AutocompleteServer.ipcChannelEndpoint channelId
         //Register the client type.
         RemotingConfiguration.RegisterWellKnownClientType
-            (typeof<AutocompleteServer>, "ipc://FSharp.Interactive.Intellisense.Lib/AutocompleteService")
-        //let T = Activator.GetObject(typeof<AutocompleteService>,"ipc://" + channelName + "/AutocompleteService") 
+            (typeof<AutocompleteServer>, channelUri)
         let T = 
             Activator.GetObject
-                (typeof<AutocompleteServer>, "ipc://FSharp.Interactive.Intellisense.Lib/AutocompleteService")
+                (typeof<AutocompleteServer>, channelUri)
         let x = T :?> AutocompleteService
         x

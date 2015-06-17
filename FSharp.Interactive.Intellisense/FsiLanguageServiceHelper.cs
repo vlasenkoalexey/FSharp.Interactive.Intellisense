@@ -121,7 +121,7 @@ namespace FSharp.Interactive.Intellisense
 
                 fsiProcess.Invoke("printfn \"Registering Autocomplete provider\";;");
                 fsiProcess.Invoke(String.Format("#r \"{0}\";;", typeof(AutocompleteServer).Assembly.Location));
-                fsiProcess.Invoke("FSharp.Interactive.Intellisense.Lib.AutocompleteServer.StartServer(\"channel\");;");
+                fsiProcess.Invoke(String.Format("FSharp.Interactive.Intellisense.Lib.AutocompleteServer.StartServer({0});;", sessionRValueValue.GetHashCode()));
                 returnValue = true;
 
                 System.Threading.Tasks.Task.Delay(2500).ContinueWith((t) =>
@@ -129,7 +129,7 @@ namespace FSharp.Interactive.Intellisense
                     // activate session
                     try
                     {
-                        AutocompleteService autocomplteService = AutocompleteClient.GetAutocompleteService();
+                        AutocompleteService autocomplteService = AutocompleteClient.SetAutocompleteServiceChannel(sessionRValueValue.GetHashCode());
                         autocomplteService.Ping();
                         fsiProcess.Invoke("printfn \"Autocomplete provider registration complete\";;");
                     }

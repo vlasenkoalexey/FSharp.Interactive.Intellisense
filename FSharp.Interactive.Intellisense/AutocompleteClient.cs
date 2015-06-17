@@ -15,21 +15,20 @@ namespace FSharp.Interactive.Intellisense
 
         public static AutocompleteService GetAutocompleteService()
         {
-            if (autocompleteService == null)
+            return autocompleteService;
+        }
+
+        public static AutocompleteService SetAutocompleteServiceChannel(int channelId)
+        {
+            lock (syncRoot)
             {
-                lock(syncRoot)
+                try
                 {
-                    if (autocompleteService == null)
-                    {
-                        try
-                        {
-                            autocompleteService = AutocompleteServer.StartClient("channel");
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine("Can't instantiate ipc service channel: " + ex.ToString());
-                        }
-                    }
+                    autocompleteService = AutocompleteServer.StartClient(channelId);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Can't instantiate ipc service channel: " + ex.ToString());
                 }
             }
 

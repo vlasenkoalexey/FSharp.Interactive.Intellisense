@@ -19,9 +19,10 @@ http://stackoverflow.com/questions/4604139/how-to-get-the-f-name-of-a-module-fun
 + Add icons
 https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039f35090e/PowerShellTools/Intellisense/PowerShellCompletionSource.cs
 + TODO: wrap fsiToolWindow into class -> wrapped into method
-- Using unique Remoting channel
++ Using unique Remoting channel
 
 P2:
+- Show completion tooltips
 - Autocomplete for static variables System.Threading.CurrentThread. <- 
 - Autocomplete on Ctrl + tab
 - Autocomplete options through interactive

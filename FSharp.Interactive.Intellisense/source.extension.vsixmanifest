@@ -2,8 +2,8 @@
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
     <Identity Id="FSharp.Interactive.Intellisense..cf203c2d-86c8-4b73-ada9-6ac761673935" Version="1.0" Language="en-US" Publisher="Aleksey Vlasenko" />
-    <DisplayName>FSharp.Interactive.Intellisense</DisplayName>
-    <Description>This is a sample classifier extension to the Visual Studio Editor.</Description>
+    <DisplayName>F# Interactive intellisense</DisplayName>
+    <Description xml:space="preserve">Basic intellisense support for F# Interactive</Description>
   </Metadata>
   <Installation>
     <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="12.0" />

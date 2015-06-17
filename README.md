@@ -18,7 +18,7 @@ http://stackoverflow.com/questions/4604139/how-to-get-the-f-name-of-a-module-fun
 + Auto open default namespaces -> make printfn or Seq. work by default
 + Add icons
 https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039f35090e/PowerShellTools/Intellisense/PowerShellCompletionSource.cs
-- TODO: wrap fsiToolWindow into class
++ TODO: wrap fsiToolWindow into class -> wrapped into method
 - Using unique Remoting channel
 
 P2:

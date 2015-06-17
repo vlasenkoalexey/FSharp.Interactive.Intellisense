@@ -167,18 +167,9 @@ namespace FSharp.Interactive.Intellisense
             m_session.Dismissed += this.OnSessionDismissed;
 
             // TODO: wrap fsiToolWindow into class
-            if (fsiToolWindow != null && m_session != null)
+            if (m_session != null)
             {
-                dynamic source = ExposedObject.From(fsiToolWindow).source;
-                if (source != null)
-                {
-                    dynamic completionSet = ExposedObject.From(source).CompletionSet;
-                    if (completionSet != null)
-                    {
-                        dynamic completionSetExp = ExposedObject.From(completionSet);
-                        completionSetExp.displayed = true;
-                    }
-                }
+                SetFsiToolWindowCompletionSetVisibilty(true);
             }
 
             return true;
@@ -188,6 +179,11 @@ namespace FSharp.Interactive.Intellisense
         {
             m_session.Dismissed -= this.OnSessionDismissed;
             m_session = null;
+            SetFsiToolWindowCompletionSetVisibilty(false);
+        }
+
+        private void SetFsiToolWindowCompletionSetVisibilty(bool displayed)
+        {
             if (fsiToolWindow != null)
             {
                 dynamic source = ExposedObject.From(fsiToolWindow).source;
@@ -197,7 +193,7 @@ namespace FSharp.Interactive.Intellisense
                     if (completionSet != null)
                     {
                         dynamic completionSetExp = ExposedObject.From(completionSet);
-                        completionSetExp.displayed = false;
+                        completionSetExp.displayed = displayed;
                     }
                 }
             }

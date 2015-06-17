@@ -35,34 +35,36 @@ namespace FSharp.Interactive.Intellisense
 
         private Object GetSession()
         {
-            var providerGlobal = (IOleServiceProvider)Package.GetGlobalService(typeof(IOleServiceProvider));
-            var provider = new ServiceProvider(providerGlobal);
-            dynamic fsiLanguageService = ExposedObject.From(provider.GetService(fsiLanguageServiceType));
-            dynamic sessions = fsiLanguageService.sessions;
-            if (sessions != null)
-            { 
-                dynamic sessionsValue = ExposedObject.From(sessions).Value;
-                dynamic sessionR = ExposedObject.From(sessionsValue).sessionR;
-                dynamic sessionRValue = ExposedObject.From(sessionR).Value;
-                dynamic sessionRValueValue = ExposedObject.From(sessionRValue).Value;
-                dynamic exitedE = ExposedObject.From(sessionRValueValue).exitedE;
-                try
-                {
-                    MethodInfo methodInfo = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session+Session").GetMethod("get_Exited");
-                    IObservable<EventArgs> exited = methodInfo.Invoke(sessionRValueValue, null);
-                    IObserver<EventArgs> obsvr = Observer.Create<EventArgs>(
-                        x => { RegisterAutocompleteServer(); },
-                        ex => { },
-                        () => { });
+            try
+            {
+                var providerGlobal = (IOleServiceProvider)Package.GetGlobalService(typeof(IOleServiceProvider));
+                var provider = new ServiceProvider(providerGlobal);
+                dynamic fsiLanguageService = ExposedObject.From(provider.GetService(fsiLanguageServiceType));
+                dynamic sessions = fsiLanguageService.sessions;
+                if (sessions != null)
+                { 
+                    dynamic sessionsValue = ExposedObject.From(sessions).Value;
+                    dynamic sessionR = ExposedObject.From(sessionsValue).sessionR;
+                    dynamic sessionRValue = ExposedObject.From(sessionR).Value;
+                    dynamic sessionRValueValue = ExposedObject.From(sessionRValue).Value;
+                    dynamic exitedE = ExposedObject.From(sessionRValueValue).exitedE;
 
-                    exited.Subscribe(obsvr);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex);
-                }
+                        MethodInfo methodInfo = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session+Session").GetMethod("get_Exited");
+                        IObservable<EventArgs> exited = methodInfo.Invoke(sessionRValueValue, null);
+                        IObserver<EventArgs> obsvr = Observer.Create<EventArgs>(
+                            x => { RegisterAutocompleteServer(); },
+                            ex => { },
+                            () => { });
+
+                        exited.Subscribe(obsvr);
+
                 
-                return sessionRValueValue;
+                    return sessionRValueValue;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
             }
 
             return null;

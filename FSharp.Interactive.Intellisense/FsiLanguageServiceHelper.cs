@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reflection;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
@@ -52,7 +53,9 @@ namespace FSharp.Interactive.Intellisense
                         MethodInfo methodInfo = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session+Session").GetMethod("get_Exited");
                         IObservable<EventArgs> exited = methodInfo.Invoke(sessionRValueValue, null);
                         IObserver<EventArgs> obsvr = Observer.Create<EventArgs>(
-                            x => { RegisterAutocompleteServer(); },
+                            x => {
+                            //    RegisterAutocompleteServer(); 
+                            },
                             ex => { },
                             () => { });
 
@@ -115,6 +118,15 @@ namespace FSharp.Interactive.Intellisense
 
             if (sessionRValueValue != null && sessionRValueValue != sessionCache)
             {
+                AutocompleteService autocompleteService = AutocompleteClient.GetAutocompleteService();
+                if (autocompleteService != null)
+                {
+                    try
+                    {
+                        ((IClientChannel)autocompleteService).Close();
+                    }
+                    catch { }
+                }
                 sessionCache = sessionRValueValue;
                 MethodInfo methodInfo = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session+Session").GetMethod("get_Input");
                 dynamic fsiProcess = methodInfo.Invoke((Object)sessionRValueValue, null);
@@ -124,13 +136,14 @@ namespace FSharp.Interactive.Intellisense
                 fsiProcess.Invoke(String.Format("FSharp.Interactive.Intellisense.Lib.AutocompleteServer.StartServer({0});;", sessionRValueValue.GetHashCode()));
                 returnValue = true;
 
-                System.Threading.Tasks.Task.Delay(2500).ContinueWith((t) =>
+                System.Threading.Tasks.Task.Delay(3500).ContinueWith((t) =>
                 {
                     // activate session
                     try
                     {
-                        AutocompleteService autocomplteService = AutocompleteClient.SetAutocompleteServiceChannel(sessionRValueValue.GetHashCode());
-                        autocomplteService.Ping();
+                        autocompleteService = AutocompleteClient.SetAutocompleteServiceChannel(sessionRValueValue.GetHashCode());
+                        autocompleteService.Ping();
+                        var comple = autocompleteService.GetCompletions("sys");
                         fsiProcess.Invoke("printfn \"Autocomplete provider registration complete\";;");
                     }
                     catch (Exception ex)

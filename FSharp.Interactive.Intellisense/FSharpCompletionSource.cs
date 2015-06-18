@@ -40,8 +40,6 @@ namespace FSharp.Interactive.Intellisense
             return false;
         }
 
-        private AutocompleteService autocomplteService;
-
         void ICompletionSource.AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
         {
             ITextSnapshot snapshot = textBuffer.CurrentSnapshot;
@@ -69,19 +67,7 @@ namespace FSharp.Interactive.Intellisense
 
             String statement = applicableTo1.GetText(applicableTo1.TextBuffer.CurrentSnapshot);
 
-            if (autocomplteService == null)
-            {
-                try
-                {
-                    autocomplteService = AutocompleteClient.GetAutocompleteService();
-
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.ToString());
-                }
-            }
-
+            AutocompleteService autocomplteService = AutocompleteClient.GetAutocompleteService();
             IEnumerable<Tuple<String, int>> completions = new List<Tuple<String, int>>();
             if (autocomplteService != null)
             {

@@ -20,10 +20,13 @@ http://stackoverflow.com/questions/4604139/how-to-get-the-f-name-of-a-module-fun
 https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039f35090e/PowerShellTools/Intellisense/PowerShellCompletionSource.cs
 + TODO: wrap fsiToolWindow into class -> wrapped into method
 + Using unique Remoting channel
++ Replaced remoting with WCF named pipes
+- Retry accessing client autocomplete service after registration to make sure that it is up and running
+- Autocomplete for static variables let somevar = Some(1);; somvar.Value. <- 
+- Pass instance of ICompletion interface from server
 
 P2:
 - Show completion tooltips
-- Autocomplete for static variables System.Threading.CurrentThread. <- 
 - Autocomplete on Ctrl + tab
 - Autocomplete options through interactive
 - Try to use internal autocomplete service

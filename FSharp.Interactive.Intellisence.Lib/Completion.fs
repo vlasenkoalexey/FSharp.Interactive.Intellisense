@@ -4,19 +4,20 @@ open System
 
 [<Serializable>]
 type public CompletionType = Namespace = 0 | Module = 1 | Class = 2 | Variable = 3 | Method = 4
+
+[<Serializable>]
 type ICompletion = 
     abstract member Text : String
     abstract member CompletionType : CompletionType
 
 [<Serializable>]
 type public Completion(text:String, completionType:CompletionType) = 
-    inherit System.MarshalByRefObject()
     
     member x.CompletionType = completionType
     member x.Text = text
     member x.ToTuple() = (text, int completionType)
     static member FromTuple (text:String, completionType:int) =
-        new Completion(text, enum completionType)
+        new Completion(text, enum completionType)   
 
     interface ICompletion with
         member x.CompletionType = completionType

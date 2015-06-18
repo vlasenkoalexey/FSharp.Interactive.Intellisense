@@ -5,12 +5,15 @@ open System.Diagnostics
 open System.Runtime.Remoting.Channels
 open System.Runtime.Remoting
 open System.Runtime.Remoting.Lifetime
+open System.ServiceModel
 
-[<AbstractClass>]
 [<Serializable>]
-type AutocompleteService() = 
-    inherit System.MarshalByRefObject()
-    abstract Ping : unit -> bool
-    abstract GetBaseDirectory : unit -> String
+[<ServiceContract>]
+type AutocompleteService = 
+    [<OperationContract>]
+    abstract Ping : a:unit -> bool
+    [<OperationContract>]
+    abstract GetBaseDirectory : b:unit -> String
     // If I use any type from this assembly, Remoting crashes with "unable to find assembly" exception.
-    abstract GetCompletions: String -> (String * int)[] 
+    [<OperationContract>]
+    abstract GetCompletions: c:String -> (String * int)[] 

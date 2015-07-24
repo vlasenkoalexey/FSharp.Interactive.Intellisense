@@ -136,7 +136,7 @@ namespace FSharp.Interactive.Intellisense
                 fsiProcess.Invoke(String.Format("FSharp.Interactive.Intellisense.Lib.AutocompleteServer.StartServer({0});;", sessionRValueValue.GetHashCode()));
                 returnValue = true;
 
-                System.Threading.Tasks.Task.Delay(3500).ContinueWith((t) =>
+                System.Threading.Tasks.Task.Delay(4000).ContinueWith((t) =>
                 {
                     // activate session
                     try
@@ -152,6 +152,18 @@ namespace FSharp.Interactive.Intellisense
                     }
                 });
 
+            }
+            else
+            {
+                AutocompleteService autocompleteService = AutocompleteClient.GetAutocompleteService();
+                if (autocompleteService != null)
+                {
+                    try
+                    {
+                        autocompleteService.Ping();
+                    }
+                    catch { }
+                }
             }
 
             return returnValue;

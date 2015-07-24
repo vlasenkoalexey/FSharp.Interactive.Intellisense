@@ -49,6 +49,7 @@
     <Compile Include="AutocompleteProvider.fs" />
     <Compile Include="AutocompleteService.fs" />
     <Compile Include="AutocompleteServer.fs" />
+    <None Include="Reflection.fsx" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

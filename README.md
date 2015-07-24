@@ -23,6 +23,8 @@ https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039
 + Replaced remoting with WCF named pipes
 - Retry accessing client autocomplete service after registration to make sure that it is up and running
 - Autocomplete for static variables let somevar = Some(1);; somvar.Value. <- 
+  - Need to evaluate something in FSI -> try using redirected input
+  - Use profiling API to access instance of FSIEvaluationSession
 - Pass instance of ICompletion interface from server
 
 P2:

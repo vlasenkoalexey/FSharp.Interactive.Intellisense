@@ -6,6 +6,7 @@ module AutocompleteProvider =
     open System.Collections.Generic
     open System.Reflection
     open Microsoft.FSharp.Reflection
+    open ReflectionHelper
 
     // Returns first segment foo.bar -> foo
     let getFirstSegment(statement:String) =
@@ -175,10 +176,56 @@ module AutocompleteProvider =
         |> Seq.distinct
         |> Seq.sort
 
-    let getCompletions(statement:String) : seq<Completion> = 
-        seq {
-            let fsiAssemblyOpt = getFsiAssembly()
-            if fsiAssemblyOpt.IsSome then
-                yield! getCompletionsAndOpenDefaultNamespaces(statement, fsiAssemblyOpt.Value)
-        }
+
+
+    let getCompletions(prefix:String) : seq<Completion> = 
+    //        seq {
+//            let fsiAssemblyOpt = getFsiAssembly()
+//            if fsiAssemblyOpt.IsSome then
+//                yield! getCompletionsAndOpenDefaultNamespaces(statement, fsiAssemblyOpt.Value)
+//        }
+        try
+            let fsiEvaluationSession = System.AppDomain.CurrentDomain 
+                                    |> getField "_unhandledException" 
+                                    |> getProperty "Target"
+                                    |> getField "callback"
+                                    |> getField "r"
+                                    |> getField "f"
+                                    |> getField "x"
+
+            let fsiIntellisenseProvider = fsiEvaluationSession |> getField "fsiIntellisenseProvider"
+            let istateRef = fsiEvaluationSession |> getField "istateRef"
+
+            let getCompletionsFromFsiSession(prefix:String) = 
+                fsiIntellisenseProvider |> invokeMethod "CompletionsForPartialLID" [|istateRef |> getProperty "contents"; prefix|] :?> seq<String>
+
+
+            let changeLastLetterCase(prefix:String) = 
+                if String.IsNullOrEmpty(prefix) then
+                    prefix
+                else
+                    let lastChar = prefix.[prefix.Length - 1]
+                    let updatedLastChar = 
+                        if Char.IsLower(lastChar) then
+                            Char.ToUpper(lastChar)
+                        else if Char.IsUpper(lastChar) then
+                            Char.ToLower(lastChar)
+                        else
+                            lastChar
+                    prefix.Remove(prefix.Length - 1) + updatedLastChar.ToString()
+
+            let changedLastLetterCasePrefix = changeLastLetterCase(prefix)
+            let completions = getCompletionsFromFsiSession(prefix)
+            let changedLastLetterCaseCompletions = if prefix = changedLastLetterCasePrefix then Seq.empty else getCompletionsFromFsiSession(changedLastLetterCasePrefix)
+            
+            completions
+            |> Seq.append(changedLastLetterCaseCompletions) 
+            |> Seq.distinct
+            |> Seq.sort
+            |> Seq.map(fun completion -> Completion(completion, CompletionType.Unknown))
+            
+        with 
+            | _ -> Seq.empty
+
+
     

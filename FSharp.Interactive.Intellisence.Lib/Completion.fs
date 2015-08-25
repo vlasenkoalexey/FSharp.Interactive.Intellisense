@@ -3,7 +3,7 @@
 open System
 
 [<Serializable>]
-type public CompletionType = Namespace = 0 | Module = 1 | Class = 2 | Variable = 3 | Method = 4
+type public CompletionType = Unknown = 0 | Namespace = 1 | Module = 2 | Class = 3 | Variable = 4 | Method = 5
 
 [<Serializable>]
 type ICompletion = 

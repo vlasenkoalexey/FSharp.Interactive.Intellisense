@@ -21,11 +21,14 @@ https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039
 + TODO: wrap fsiToolWindow into class -> wrapped into method
 + Using unique Remoting channel
 + Replaced remoting with WCF named pipes
-- Retry accessing client autocomplete service after registration to make sure that it is up and running
++ Retry accessing client autocomplete service after registration to make sure that it is up and running
++ Find a way to access FSI autocomplete API - done !!!!
+- No autocomplete on space
+- Merge output of custom built fsi provider and FSI autocomplete service
 - Autocomplete for static variables let somevar = Some(1);; somvar.Value. <- 
   - Need to evaluate something in FSI -> try using redirected input
-  - Use profiling API to access instance of FSIEvaluationSession
 - Pass instance of ICompletion interface from server
+ 
 
 P2:
 - Show completion tooltips

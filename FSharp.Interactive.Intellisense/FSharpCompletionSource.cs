@@ -114,6 +114,8 @@ namespace FSharp.Interactive.Intellisense
         {
             switch(completionType)
             {
+                case CompletionType.Unknown:
+                    return StandardGlyphGroup.GlyphGroupUnknown;
                 case CompletionType.Namespace:
                     return StandardGlyphGroup.GlyphGroupNamespace;
                 case CompletionType.Class:

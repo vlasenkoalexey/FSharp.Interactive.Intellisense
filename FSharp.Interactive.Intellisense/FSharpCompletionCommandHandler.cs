@@ -70,7 +70,7 @@ namespace FSharp.Interactive.Intellisense
             //check for a commit character 
             if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN
                 || nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB
-                || (char.IsWhiteSpace(typedChar) || (char.IsPunctuation(typedChar) && typedChar != '.')))
+                || char.IsPunctuation(typedChar) && typedChar != '.')
             {
 
                 //check for a a selection 
@@ -92,6 +92,12 @@ namespace FSharp.Interactive.Intellisense
                         m_session.Dismiss();
                     }
                 }
+            }
+
+            // Dismiss session when whitespace is pressed.
+            if (char.IsWhiteSpace(typedChar) && m_session != null && !m_session.IsDismissed)
+            {
+                m_session.Dismiss();
             }
 
             //pass along the command so the char is added to the buffer 

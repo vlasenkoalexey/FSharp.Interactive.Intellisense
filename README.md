@@ -23,7 +23,7 @@ https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039
 + Replaced remoting with WCF named pipes
 + Retry accessing client autocomplete service after registration to make sure that it is up and running
 + Find a way to access FSI autocomplete API - done !!!!
-- No autocomplete on space
++ No autocomplete on space - dismiss session
 - Merge output of custom built fsi provider and FSI autocomplete service
 - Autocomplete for static variables let somevar = Some(1);; somvar.Value. <- 
   - Need to evaluate something in FSI -> try using redirected input
@@ -34,9 +34,3 @@ P2:
 - Show completion tooltips
 - Autocomplete on Ctrl + tab
 - Autocomplete options through interactive
-- Try to use internal autocomplete service
-	- Try to use internal flag indicating if autocomplete should be enabled
-- Figure out how to access instance of FSI.exe process, and use stuff related to SetCompletionFunction
-	- Figure out how interactive service is started
-	- See if I can find reference through fsi var in console
-	- Handle open directive in interactive

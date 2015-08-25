@@ -34,3 +34,4 @@ P2:
 - Show completion tooltips
 - Autocomplete on Ctrl + tab
 - Autocomplete options through interactive
+- See if it is possible to integrate with https://github.com/fsharp/FsAutoComplete

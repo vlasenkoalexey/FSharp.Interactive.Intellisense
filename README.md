@@ -24,7 +24,7 @@ https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039
 + Retry accessing client autocomplete service after registration to make sure that it is up and running
 + Find a way to access FSI autocomplete API - done !!!!
 + No autocomplete on space - dismiss session
-- Merge output of custom built fsi provider and FSI autocomplete service
++ Merge output of custom built fsi provider and FSI autocomplete service
 - Autocomplete for static variables let somevar = Some(1);; somvar.Value. <- 
   - Need to evaluate something in FSI -> try using redirected input
 - Pass instance of ICompletion interface from server

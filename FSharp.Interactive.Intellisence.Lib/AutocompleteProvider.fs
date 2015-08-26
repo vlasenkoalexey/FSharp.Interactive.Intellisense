@@ -176,14 +176,14 @@ module AutocompleteProvider =
         |> Seq.distinct
         |> Seq.sort
 
+    let getCompletionsInternal(prefix:String) : seq<Completion> = 
+       seq {
+            let fsiAssemblyOpt = getFsiAssembly()
+            if fsiAssemblyOpt.IsSome then
+                yield! getCompletionsAndOpenDefaultNamespaces(prefix, fsiAssemblyOpt.Value)
+     }
 
-
-    let getCompletions(prefix:String) : seq<Completion> = 
-    //        seq {
-//            let fsiAssemblyOpt = getFsiAssembly()
-//            if fsiAssemblyOpt.IsSome then
-//                yield! getCompletionsAndOpenDefaultNamespaces(statement, fsiAssemblyOpt.Value)
-//        }
+    let getCompletionsFromFsiSession(prefix:String) : seq<String> = 
         try
             let fsiEvaluationSession = System.AppDomain.CurrentDomain 
                                     |> getField "_unhandledException" 
@@ -198,7 +198,6 @@ module AutocompleteProvider =
 
             let getCompletionsFromFsiSession(prefix:String) = 
                 fsiIntellisenseProvider |> invokeMethod "CompletionsForPartialLID" [|istateRef |> getProperty "contents"; prefix|] :?> seq<String>
-
 
             let changeLastLetterCase(prefix:String) = 
                 if String.IsNullOrEmpty(prefix) then
@@ -222,10 +221,34 @@ module AutocompleteProvider =
             |> Seq.append(changedLastLetterCaseCompletions) 
             |> Seq.distinct
             |> Seq.sort
-            |> Seq.map(fun completion -> Completion(completion, CompletionType.Unknown))
-            
         with 
             | _ -> Seq.empty
+
+
+    let getCompletions(prefix:String) : seq<Completion> = 
+        let internalCompletions = getCompletionsInternal(prefix)
+
+        let fsiSessionCompletionsMap = getCompletionsFromFsiSession(prefix)
+                                        |> Seq.map(fun c -> (c, CompletionType.Unknown))
+                                        |> Map.ofSeq
+
+        let internalCompletionsMap = internalCompletions |> Seq.map(fun compl -> (compl.Text, compl.CompletionType)) |> Map.ofSeq
+
+        let mergeMaps (a : Map<'a, 'b>) (b : Map<'a, 'b>) (f : 'a -> 'b * 'b -> 'b) =
+            Map.fold (fun s k v ->
+                match Map.tryFind k s with
+                | Some v' -> Map.add k (f k (v, v')) s
+                | None -> Map.add k v s) a b
+
+        let combinedMap = mergeMaps internalCompletionsMap fsiSessionCompletionsMap (fun key (v1, v2) -> v2)
+        
+        combinedMap
+        |> Map.toSeq
+        |> Seq.map(fun (text, completionType) -> new Completion(text, completionType))
+
+
+
+
 
 
     

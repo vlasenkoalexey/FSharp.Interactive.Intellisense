@@ -68,7 +68,7 @@ namespace FSharp.Interactive.Intellisense
             String statement = applicableTo1.GetText(applicableTo1.TextBuffer.CurrentSnapshot);
 
             AutocompleteService autocomplteService = AutocompleteClient.GetAutocompleteService();
-            IEnumerable<Tuple<String, int>> completions = new List<Tuple<String, int>>();
+            IEnumerable<StatementCompletion> completions = new List<StatementCompletion>();
             if (autocomplteService != null)
             {
                 try
@@ -84,9 +84,9 @@ namespace FSharp.Interactive.Intellisense
             compList = new List<Completion>();
             bool prependDot = statement.EndsWith(".");
 
-            foreach (Tuple<String, int> tuple in completions)
+            foreach (StatementCompletion completion in completions)
             {
-                StatementCompletion completion = StatementCompletion.FromTuple(tuple.Item1, tuple.Item2);
+                //StatementCompletion completion = StatementCompletion.FromTuple(tuple.Item1, tuple.Item2);
                 string str = completion.Text;
                 var glyph = sourceProvider.GlyphService.GetGlyph(CompletionTypeToStandardGlyphGroup(completion.CompletionType),
                     StandardGlyphItem.GlyphItemPublic);

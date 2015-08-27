@@ -2,10 +2,8 @@
 
 open System
 open System.Diagnostics
-open System.Runtime.Remoting.Channels
-open System.Runtime.Remoting
-open System.Runtime.Remoting.Lifetime
 open System.ServiceModel
+open System.Collections.Generic
 
 [<Serializable>]
 [<ServiceContract>]
@@ -16,4 +14,4 @@ type AutocompleteService =
     abstract GetBaseDirectory : b:unit -> String
     // If I use any type from this assembly, Remoting crashes with "unable to find assembly" exception.
     [<OperationContract>]
-    abstract GetCompletions: c:String -> (String * int)[] 
+    abstract GetCompletions: c:String -> seq<Completion>

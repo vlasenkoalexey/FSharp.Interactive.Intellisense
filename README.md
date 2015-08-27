@@ -25,13 +25,12 @@ https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039
 + Find a way to access FSI autocomplete API - done !!!!
 + No autocomplete on space - dismiss session
 + Merge output of custom built fsi provider and FSI autocomplete service
-- Autocomplete for static variables let somevar = Some(1);; somvar.Value. <- 
-  - Need to evaluate something in FSI -> try using redirected input
-- Pass instance of ICompletion interface from server
- 
++ Pass instance of ICompletion interface from server
++ Autocomplete on Ctrl + tab
+- Autocomplete options through interactive - ??? - use config instead
 
 P2:
+- Autocomplete for static variables let somevar = Some(1);; somvar.Value. <- 
+  - Need to evaluate something in FSI -> try using redirected input
 - Show completion tooltips
-- Autocomplete on Ctrl + tab
-- Autocomplete options through interactive
 - See if it is possible to integrate with https://github.com/fsharp/FsAutoComplete

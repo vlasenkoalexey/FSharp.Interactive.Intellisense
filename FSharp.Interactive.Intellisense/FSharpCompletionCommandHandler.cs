@@ -140,6 +140,19 @@ namespace FSharp.Interactive.Intellisense
                     surfaceElement.Focus();
                 }
             }
+            else if (commandID == (uint)VSConstants.VSStd2KCmdID.AUTOCOMPLETE || commandID == (uint)VSConstants.VSStd2KCmdID.COMPLETEWORD)
+            {
+                // Trigger completion on Ctrl + Space
+                if (m_session == null || m_session.IsDismissed) // If there is no active session, bring up completion
+                {
+                    this.TriggerCompletion();
+                    if (m_session != null && typedChar != '.')
+                    {
+                        m_session.Filter();
+                    }
+                }
+
+            }
             else if (commandID == (uint)VSConstants.VSStd2KCmdID.BACKSPACE   //redo the filter if there is a deletion
                 || commandID == (uint)VSConstants.VSStd2KCmdID.DELETE)
             {

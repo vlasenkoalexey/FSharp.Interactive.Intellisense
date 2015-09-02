@@ -143,7 +143,7 @@ namespace FSharp.Interactive.Intellisense
                     {
                         autocompleteService = AutocompleteClient.SetAutocompleteServiceChannel(sessionRValueValue.GetHashCode());
                         autocompleteService.Ping();
-                        var comple = autocompleteService.GetCompletions("sys");
+                        var comple = autocompleteService.GetCompletions("sys", IntellisenseProviderType.Combined);
                         fsiProcess.Invoke("printfn \"Autocomplete provider registration complete\";;");
                     }
                     catch (Exception ex)
@@ -151,7 +151,6 @@ namespace FSharp.Interactive.Intellisense
                         Debug.WriteLine(ex);
                     }
                 });
-
             }
             else
             {

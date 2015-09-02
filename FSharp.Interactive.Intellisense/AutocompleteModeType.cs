@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FSharp.Interactive.Intellisense
 {
-    public enum AutocompleteModeEnum
+    public enum AutocompleteModeType
     {
         Automatic,
         CtrlSpace,

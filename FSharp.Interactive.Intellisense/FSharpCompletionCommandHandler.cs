@@ -51,11 +51,11 @@ namespace FSharp.Interactive.Intellisense
             return m_nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
         }
 
-        private AutocompleteModeEnum autocompleteMode = AutocompleteModeEnum.Automatic;
+        private AutocompleteModeType autocompleteMode = AutocompleteModeType.Automatic;
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            if (autocompleteMode == AutocompleteModeEnum.Off 
+            if (autocompleteMode == AutocompleteModeType.Off 
                 || VsShellUtilities.IsInAutomationFunction(m_provider.ServiceProvider))
             {
                 return m_nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
@@ -106,7 +106,7 @@ namespace FSharp.Interactive.Intellisense
             int retVal = m_nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             bool handled = false;
             if (!typedChar.Equals(char.MinValue) && (char.IsLetterOrDigit(typedChar) || typedChar == '.') &&
-                autocompleteMode == AutocompleteModeEnum.Automatic)
+                autocompleteMode == AutocompleteModeType.Automatic)
             {
                 if (m_session == null || m_session.IsDismissed) // If there is no active session, bring up completion
                 {
@@ -143,7 +143,7 @@ namespace FSharp.Interactive.Intellisense
                     surfaceElement.Focus();
                 }
             }
-            else if ((autocompleteMode == AutocompleteModeEnum.Automatic || autocompleteMode == AutocompleteModeEnum.CtrlSpace) 
+            else if ((autocompleteMode == AutocompleteModeType.Automatic || autocompleteMode == AutocompleteModeType.CtrlSpace) 
                 && (commandID == (uint)VSConstants.VSStd2KCmdID.AUTOCOMPLETE || commandID == (uint)VSConstants.VSStd2KCmdID.COMPLETEWORD))
             {
                 // Trigger completion on Ctrl + Space

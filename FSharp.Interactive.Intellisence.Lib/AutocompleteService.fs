@@ -12,6 +12,5 @@ type AutocompleteService =
     abstract Ping : a:unit -> bool
     [<OperationContract>]
     abstract GetBaseDirectory : b:unit -> String
-    // If I use any type from this assembly, Remoting crashes with "unable to find assembly" exception.
     [<OperationContract>]
-    abstract GetCompletions: c:String -> seq<Completion>
+    abstract GetCompletions: prefix:String -> providerType:IntellisenseProviderType -> seq<Completion>

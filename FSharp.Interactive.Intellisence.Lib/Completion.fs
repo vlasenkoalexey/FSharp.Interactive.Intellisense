@@ -6,6 +6,9 @@ open System
 type public CompletionType = Unknown = 0 | Namespace = 1 | Module = 2 | Class = 3 | Variable = 4 | Method = 5
 
 [<Serializable>]
+type public IntellisenseProviderType = Combined = 0 | FsiSession = 1 | Internal = 2
+
+[<Serializable>]
 type ICompletion = 
     abstract member Text : String
     abstract member CompletionType : CompletionType

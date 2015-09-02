@@ -69,11 +69,12 @@ namespace FSharp.Interactive.Intellisense
 
             AutocompleteService autocomplteService = AutocompleteClient.GetAutocompleteService();
             IEnumerable<StatementCompletion> completions = new List<StatementCompletion>();
+            IntellisenseProviderType intellisenseProviderType = IntellisenseProviderType.Combined;
             if (autocomplteService != null)
             {
                 try
                 {
-                    completions = autocomplteService.GetCompletions(statement);
+                    completions = autocomplteService.GetCompletions(statement, intellisenseProviderType);
                 }
                 catch (Exception ex)
                 {

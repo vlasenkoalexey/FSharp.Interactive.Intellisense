@@ -46,15 +46,17 @@ namespace FSharp.Interactive.Intellisense
             this.textViewAdapter = textViewAdapter;
         }
 
-
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
             return m_nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
         }
 
+        private AutocompleteModeEnum autocompleteMode = AutocompleteModeEnum.Automatic;
+
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            if (VsShellUtilities.IsInAutomationFunction(m_provider.ServiceProvider))
+            if (autocompleteMode == AutocompleteModeEnum.Off 
+                || VsShellUtilities.IsInAutomationFunction(m_provider.ServiceProvider))
             {
                 return m_nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             }
@@ -103,7 +105,8 @@ namespace FSharp.Interactive.Intellisense
             //pass along the command so the char is added to the buffer 
             int retVal = m_nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             bool handled = false;
-            if (!typedChar.Equals(char.MinValue) && (char.IsLetterOrDigit(typedChar) || typedChar == '.'))
+            if (!typedChar.Equals(char.MinValue) && (char.IsLetterOrDigit(typedChar) || typedChar == '.') &&
+                autocompleteMode == AutocompleteModeEnum.Automatic)
             {
                 if (m_session == null || m_session.IsDismissed) // If there is no active session, bring up completion
                 {
@@ -140,7 +143,8 @@ namespace FSharp.Interactive.Intellisense
                     surfaceElement.Focus();
                 }
             }
-            else if (commandID == (uint)VSConstants.VSStd2KCmdID.AUTOCOMPLETE || commandID == (uint)VSConstants.VSStd2KCmdID.COMPLETEWORD)
+            else if ((autocompleteMode == AutocompleteModeEnum.Automatic || autocompleteMode == AutocompleteModeEnum.CtrlSpace) 
+                && (commandID == (uint)VSConstants.VSStd2KCmdID.AUTOCOMPLETE || commandID == (uint)VSConstants.VSStd2KCmdID.COMPLETEWORD))
             {
                 // Trigger completion on Ctrl + Space
                 if (m_session == null || m_session.IsDismissed) // If there is no active session, bring up completion

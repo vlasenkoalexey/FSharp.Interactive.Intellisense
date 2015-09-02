@@ -10,15 +10,7 @@ namespace FSharp.Interactive.Intellisense
 {
     public class OptionsPageGrid : DialogPage
     {
-        private int optionInt = 256;
-        public enum AutocompleteMode
-        {
-            Automatic,
-            CtrlSpace,
-            Off
-        }
-
-        public enum IntellisenseProvider
+        public enum IntellisenseProviderEnum
         {
             Combined,
             FsiSession,
@@ -27,11 +19,20 @@ namespace FSharp.Interactive.Intellisense
 
         [Category("Settings")]
         [DisplayName("Autocomplete mode")]
-        [Description("The way autocomplete is triggered")]
-        public int OptionInteger
+        [Description("The way autocomplete is triggered (automatically, when Ctrl + Space is pressed, or Off).")]
+        public AutocompleteModeEnum AutocompleteMode
         {
-            get { return optionInt; }
-            set { optionInt = value; }
+            get;
+            set;
+        }
+
+        [Category("Settings")]
+        [DisplayName("Intellisense provider")]
+        [Description("Type of completions provider for Intellisense.")]
+        public IntellisenseProviderEnum IntellisenseProvider
+        {
+            get;
+            set;
         }
     }
 }

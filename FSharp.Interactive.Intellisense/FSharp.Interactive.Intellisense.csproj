@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutocompleteClient.cs" />
+    <Compile Include="AutocompleteModeEnum.cs" />
     <Compile Include="CommandChainNodeWrapper.cs" />
     <Compile Include="ExposedObject.cs" />
     <Compile Include="ExposedObjectHelper.cs" />

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="FSharp.Interactive.Intellisense..cf203c2d-86c8-4b73-ada9-6ac761673935" Version="1.0" Language="en-US" Publisher="Aleksey Vlasenko" />
+    <Identity Id="225a4dcf-86ef-4279-b906-f4155df19e5f" Version="1.0" Language="en-US" Publisher="Aleksey Vlasenko" />
     <DisplayName>F# Interactive intellisense</DisplayName>
     <Description xml:space="preserve">Basic intellisense support for F# Interactive</Description>
   </Metadata>
@@ -10,6 +10,7 @@
   </Installation>
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="4.5" />
+    <Dependency Id="Microsoft.VisualStudio.MPF.12.0" DisplayName="Visual Studio MPF 12.0" d:Source="Installed" Version="[12.0]" />
   </Dependencies>
   <Assets>
     <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />

@@ -17,7 +17,7 @@ type AutocompleteServer() =
         member x.Ping() = true
         member x.GetBaseDirectory() = System.AppDomain.CurrentDomain.BaseDirectory
         member x.GetCompletions(prefix: String) (providerType: IntellisenseProviderType): seq<Completion> = 
-            let results = AutocompleteProvider.getCompletions(prefix) 
+            let results = AutocompleteProvider.getCompletions(prefix, providerType) 
             results 
 
     static member ipcAddressFormat = "net.pipe://localhost/Sharp.Interactive.Intellisense.Lib_{0}/AutocompleteService"

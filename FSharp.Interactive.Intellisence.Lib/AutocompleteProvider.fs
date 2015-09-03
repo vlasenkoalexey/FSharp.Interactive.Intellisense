@@ -225,26 +225,36 @@ module AutocompleteProvider =
             | _ -> Seq.empty
 
 
-    let getCompletions(prefix:String) : seq<Completion> = 
-        let internalCompletions = getCompletionsInternal(prefix)
+    let getCompletions(prefix:String, providerType : IntellisenseProviderType) : seq<Completion> = 
+        match providerType with
+        | IntellisenseProviderType.Internal -> 
+            let internalCompletions = getCompletionsInternal(prefix)
+            internalCompletions
+        | IntellisenseProviderType.FsiSession ->
+            let fsiSessionCompletions = getCompletionsFromFsiSession(prefix)
+                                            |> Seq.map(fun c -> new Completion(c, CompletionType.Unknown))
+            fsiSessionCompletions
+        | IntellisenseProviderType.Combined ->
+            let internalCompletions = getCompletionsInternal(prefix) 
+            let fsiSessionCompletionsMap = getCompletionsFromFsiSession(prefix)
+                                            |> Seq.map(fun c -> (c, CompletionType.Unknown))
+                                            |> Map.ofSeq
 
-        let fsiSessionCompletionsMap = getCompletionsFromFsiSession(prefix)
-                                        |> Seq.map(fun c -> (c, CompletionType.Unknown))
-                                        |> Map.ofSeq
+            let internalCompletionsMap = internalCompletions |> Seq.map(fun compl -> (compl.Text, compl.CompletionType)) |> Map.ofSeq
 
-        let internalCompletionsMap = internalCompletions |> Seq.map(fun compl -> (compl.Text, compl.CompletionType)) |> Map.ofSeq
+            let mergeMaps (a : Map<'a, 'b>) (b : Map<'a, 'b>) (f : 'a -> 'b * 'b -> 'b) =
+                Map.fold (fun s k v ->
+                    match Map.tryFind k s with
+                    | Some v' -> Map.add k (f k (v, v')) s
+                    | None -> Map.add k v s) a b
 
-        let mergeMaps (a : Map<'a, 'b>) (b : Map<'a, 'b>) (f : 'a -> 'b * 'b -> 'b) =
-            Map.fold (fun s k v ->
-                match Map.tryFind k s with
-                | Some v' -> Map.add k (f k (v, v')) s
-                | None -> Map.add k v s) a b
-
-        let combinedMap = mergeMaps internalCompletionsMap fsiSessionCompletionsMap (fun key (v1, v2) -> v2)
+            let combinedMap = mergeMaps internalCompletionsMap fsiSessionCompletionsMap (fun key (v1, v2) -> v2)
         
-        combinedMap
-        |> Map.toSeq
-        |> Seq.map(fun (text, completionType) -> new Completion(text, completionType))
+            let combinedCompletions = combinedMap
+                                      |> Map.toSeq
+                                      |> Seq.map(fun (text, completionType) -> new Completion(text, completionType))
+            combinedCompletions
+        | _ -> Seq.empty
 
 
 

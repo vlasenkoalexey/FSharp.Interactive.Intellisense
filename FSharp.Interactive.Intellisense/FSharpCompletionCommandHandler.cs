@@ -31,9 +31,14 @@ namespace FSharp.Interactive.Intellisense
 
         internal FSharpCompletionCommandHandler(IVsTextView textViewAdapter, ITextView textView, FSharpCompletionHandlerProvider fsharpCompletionHandlerProvider)
         {
-
+            
             this.m_textView = textView;
             this.m_provider = fsharpCompletionHandlerProvider;
+
+            var p = this.m_provider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+            var settings = p.get_Properties("F# Interactive intellisense", "Settings");
+            var mode = settings.Item("Autocomplete mode");
+            
             textViewAdapter.AddCommandFilter(this, out m_nextCommandHandler);
 
             Task.Delay(2000).ContinueWith((a) =>
@@ -51,7 +56,14 @@ namespace FSharp.Interactive.Intellisense
             return m_nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
         }
 
-        private AutocompleteModeType autocompleteMode = AutocompleteModeType.Automatic;
+        private AutocompleteModeType autocompleteMode
+        {
+            get
+            {
+                //return this.m_provider.GetPackage();
+                return AutocompleteModeType.Automatic;
+            }
+        }
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {

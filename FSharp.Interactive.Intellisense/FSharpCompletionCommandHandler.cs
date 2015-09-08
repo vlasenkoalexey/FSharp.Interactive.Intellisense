@@ -35,10 +35,29 @@ namespace FSharp.Interactive.Intellisense
         {
             get
             {
-                var settings = dte.get_Properties(FSharp_Interactive_IntellisensePackage.SettingsCategoryName, FSharp_Interactive_IntellisensePackage.SettingsPageName);
-                AutocompleteModeType autocompleteMode = (AutocompleteModeType)settings.Item("AutocompleteMode").Value;
-                return autocompleteMode;
+                try
+                {
+                    var settings = dte.get_Properties(FSharp_Interactive_IntellisensePackage.SettingsCategoryName, FSharp_Interactive_IntellisensePackage.SettingsPageName);
+                    AutocompleteModeType autocompleteMode = (AutocompleteModeType)settings.Item("AutocompleteMode").Value;
+                    return autocompleteMode;
+                }
+                catch (System.ArgumentException)
+                {
+                    return AutocompleteModeType.Off;
+                }
             }
+        }
+
+        private char GetLastTypedCharter()
+        {
+            // m_textView.Caret.Position.Point.GetPoint().Value.GetChar();            
+            SnapshotPoint? snapshotPoint = m_session.GetTriggerPoint(m_textView.TextBuffer.CurrentSnapshot);
+            if (!snapshotPoint.HasValue)
+            {
+                return '\0';
+            }
+
+            return (m_session.GetTriggerPoint(m_textView.TextBuffer.CurrentSnapshot).Value - 1).GetChar();
         }
 
         internal FSharpCompletionCommandHandler(IVsTextView textViewAdapter, ITextView textView, FSharpCompletionHandlerProvider fsharpCompletionHandlerProvider)
@@ -116,10 +135,9 @@ namespace FSharp.Interactive.Intellisense
             //pass along the command so the char is added to the buffer 
             int retVal = m_nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             bool handled = false;
-            if (!typedChar.Equals(char.MinValue) && (char.IsLetterOrDigit(typedChar) || typedChar == '.') &&
-                autocompleteMode == AutocompleteModeType.Automatic)
+            if (!typedChar.Equals(char.MinValue) && (char.IsLetterOrDigit(typedChar) || typedChar == '.'))
             {
-                if (m_session == null || m_session.IsDismissed) // If there is no active session, bring up completion
+                if ((m_session == null || m_session.IsDismissed) && autocompleteMode == AutocompleteModeType.Automatic) // If there is no active session, bring up completion
                 {
                     this.TriggerCompletion();
                     if (m_session != null && typedChar != '.')
@@ -161,7 +179,9 @@ namespace FSharp.Interactive.Intellisense
                 if (m_session == null || m_session.IsDismissed) // If there is no active session, bring up completion
                 {
                     this.TriggerCompletion();
-                    if (m_session != null && typedChar != '.')
+
+
+                    if (m_session != null && GetLastTypedCharter() != '.')
                     {
                         m_session.Filter();
                     }
@@ -194,7 +214,13 @@ namespace FSharp.Interactive.Intellisense
 
             if (m_session == null)
             {
-                return false;
+                // Hack: for some reason completion is not started on Ctrl+Space when TriggerCompletion, 
+                // but started on the second call.
+                m_session = m_provider.CompletionBroker.TriggerCompletion(m_textView);
+                if (m_session == null)
+                {
+                    return false;
+                }
             }
 
             //subscribe to the Dismissed event on the session 

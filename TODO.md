@@ -28,6 +28,8 @@ https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039
 + Pass instance of ICompletion interface from server
 + Autocomplete on Ctrl + tab
 + Autocomplete options
++ Exception on first autocomplete.
++ No completion on Ctrl + tab after dot
 
 P2:
 - Autocomplete for static variables let somevar = Some(1);; somvar.Value. <- 

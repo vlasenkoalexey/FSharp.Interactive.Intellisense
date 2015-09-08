@@ -28,9 +28,16 @@ namespace FSharp.Interactive.Intellisense
         {
             get
             {
-                var settings = dte.get_Properties(FSharp_Interactive_IntellisensePackage.SettingsCategoryName, FSharp_Interactive_IntellisensePackage.SettingsPageName);
-                IntellisenseProviderType intellisenseProviderType = (IntellisenseProviderType)settings.Item("IntellisenseProvider").Value;
-                return intellisenseProviderType;
+                try
+                {
+                    var settings = dte.get_Properties(FSharp_Interactive_IntellisensePackage.SettingsCategoryName, FSharp_Interactive_IntellisensePackage.SettingsPageName);
+                    IntellisenseProviderType intellisenseProviderType = (IntellisenseProviderType)settings.Item("IntellisenseProvider").Value;
+                    return intellisenseProviderType;
+                }
+                catch (ArgumentException)
+                {
+                    return IntellisenseProviderType.Combined;
+                }
             }
         }
 

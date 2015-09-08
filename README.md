@@ -27,7 +27,7 @@ https://github.com/adamdriscoll/poshtools/blob/85d62a6ec901deba4f86f55483397f039
 + Merge output of custom built fsi provider and FSI autocomplete service
 + Pass instance of ICompletion interface from server
 + Autocomplete on Ctrl + tab
-- Autocomplete options through interactive - ??? - use config instead
++ Autocomplete options
 
 P2:
 - Autocomplete for static variables let somevar = Some(1);; somvar.Value. <- 

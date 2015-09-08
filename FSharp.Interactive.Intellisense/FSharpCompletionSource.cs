@@ -26,12 +26,12 @@ namespace FSharp.Interactive.Intellisense
 
         private IntellisenseProviderType intellisenseProviderType
         {
-          get 
-          {
-             var settings = dte.get_Properties("F# Interactive intellisense", "Settings");
-             IntellisenseProviderType intellisenseProviderType = (IntellisenseProviderType)settings.Item("IntellisenseProvider").Value;
-             return intellisenseProviderType;
-          }   
+            get
+            {
+                var settings = dte.get_Properties(FSharp_Interactive_IntellisensePackage.SettingsCategoryName, FSharp_Interactive_IntellisensePackage.SettingsPageName);
+                IntellisenseProviderType intellisenseProviderType = (IntellisenseProviderType)settings.Item("IntellisenseProvider").Value;
+                return intellisenseProviderType;
+            }
         }
 
 
@@ -93,8 +93,8 @@ namespace FSharp.Interactive.Intellisense
                 {
                     Debug.WriteLine(ex.ToString());
                 }
-            }            
-            
+            }
+
             compList = new List<Completion>();
             bool prependDot = statement.EndsWith(".");
 
@@ -126,7 +126,7 @@ namespace FSharp.Interactive.Intellisense
 
         private static StandardGlyphGroup CompletionTypeToStandardGlyphGroup(CompletionType completionType)
         {
-            switch(completionType)
+            switch (completionType)
             {
                 case CompletionType.Unknown:
                     return StandardGlyphGroup.GlyphGroupUnknown;

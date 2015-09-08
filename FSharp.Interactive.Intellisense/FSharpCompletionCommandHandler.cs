@@ -35,7 +35,7 @@ namespace FSharp.Interactive.Intellisense
         {
             get
             {
-                var settings = dte.get_Properties("F# Interactive intellisense", "Settings");
+                var settings = dte.get_Properties(FSharp_Interactive_IntellisensePackage.SettingsCategoryName, FSharp_Interactive_IntellisensePackage.SettingsPageName);
                 AutocompleteModeType autocompleteMode = (AutocompleteModeType)settings.Item("AutocompleteMode").Value;
                 return autocompleteMode;
             }

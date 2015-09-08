@@ -2,7 +2,7 @@
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
     <Identity Id="225a4dcf-86ef-4279-b906-f4155df19e5f" Version="1.0" Language="en-US" Publisher="Aleksey Vlasenko" />
-    <DisplayName>F# Interactive intellisense</DisplayName>
+    <DisplayName>F# Interactive Intellisense</DisplayName>
     <Description xml:space="preserve">Basic intellisense support for F# Interactive</Description>
   </Metadata>
   <Installation>

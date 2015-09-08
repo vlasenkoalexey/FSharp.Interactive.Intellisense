@@ -14,7 +14,7 @@ namespace FSharp.Interactive.Intellisense
     [ClassInterface(ClassInterfaceType.AutoDual)]  
     public class OptionsPageGrid : DialogPage
     {
-        [Category("F# Interactive intellisense")]
+        [Category(FSharp_Interactive_IntellisensePackage.SettingsCategoryName)]
         [DisplayName("Autocomplete mode")]
         [Description("The way autocomplete is triggered (automatically, when Ctrl + Space is pressed, or Off).")]
         public AutocompleteModeType AutocompleteMode
@@ -23,7 +23,7 @@ namespace FSharp.Interactive.Intellisense
             set;
         }
 
-        [Category("F# Interactive intellisense")]
+        [Category(FSharp_Interactive_IntellisensePackage.SettingsCategoryName)]
         [DisplayName("Intellisense provider")]
         [Description("Type of completions provider for Intellisense.")]
         public IntellisenseProviderType IntellisenseProvider

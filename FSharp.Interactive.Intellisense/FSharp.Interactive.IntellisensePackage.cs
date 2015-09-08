@@ -30,9 +30,12 @@ namespace FSharp.Interactive.Intellisense
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
     [Guid(GuidList.guidFSharp_Interactive_IntellisensePkgString)]
     [ProvideOptionPage(typeof(OptionsPageGrid),
-    "F# Interactive intellisense", "Settings", 0, 0, true)]
+    SettingsCategoryName, SettingsPageName, 0, 0, true)]
     public sealed class FSharp_Interactive_IntellisensePackage : Package
     {
+        public const string SettingsCategoryName = "F# Interactive Intellisense";
+        public const string SettingsPageName = "Settings";
+
         /// <summary>
         /// Default constructor of the package.
         /// Inside this method you can place any initialization code that does not require 

@@ -6,6 +6,7 @@ FSharp.Interactive.Intellisense\FSharp.Interactive.Intellisense\bin\Release.
 Settings are available under Tools -> Options -> F# Interactive Intellisense.
 
 Demo:
+
 ![alt text](https://raw.githubusercontent.com/vlasenkoalexey/FSharp.Interactive.Intellisense/master/Demo.png "FSI Intellisense demo")
 
 

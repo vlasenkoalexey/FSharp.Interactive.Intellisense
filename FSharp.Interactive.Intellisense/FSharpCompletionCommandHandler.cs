@@ -17,6 +17,7 @@ using System.Reflection;
 using Microsoft.VisualStudio.Shell.Interop;
 using System.Diagnostics;
 using Task = System.Threading.Tasks.Task;
+using FSharp.Interactive.Intellisense.Lib;
 
 namespace FSharp.Interactive.Intellisense
 {
@@ -28,17 +29,24 @@ namespace FSharp.Interactive.Intellisense
         private ICompletionSession m_session;
         private IVsTextView textViewAdapter;
         private IOleCommandTarget fsiToolWindow;
+        private EnvDTE.DTE dte;
+
+        private AutocompleteModeType autocompleteMode
+        {
+            get
+            {
+                var settings = dte.get_Properties("F# Interactive intellisense", "Settings");
+                AutocompleteModeType autocompleteMode = (AutocompleteModeType)settings.Item("AutocompleteMode").Value;
+                return autocompleteMode;
+            }
+        }
 
         internal FSharpCompletionCommandHandler(IVsTextView textViewAdapter, ITextView textView, FSharpCompletionHandlerProvider fsharpCompletionHandlerProvider)
         {
-            
             this.m_textView = textView;
             this.m_provider = fsharpCompletionHandlerProvider;
 
-            var p = this.m_provider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
-            var settings = p.get_Properties("F# Interactive intellisense", "Settings");
-            var mode = settings.Item("Autocomplete mode");
-            
+            this.dte = this.m_provider.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
             textViewAdapter.AddCommandFilter(this, out m_nextCommandHandler);
 
             Task.Delay(2000).ContinueWith((a) =>
@@ -54,15 +62,6 @@ namespace FSharp.Interactive.Intellisense
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
             return m_nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
-        }
-
-        private AutocompleteModeType autocompleteMode
-        {
-            get
-            {
-                //return this.m_provider.GetPackage();
-                return AutocompleteModeType.Automatic;
-            }
         }
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)

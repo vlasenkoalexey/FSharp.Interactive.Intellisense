@@ -21,10 +21,24 @@ namespace FSharp.Interactive.Intellisense
         private FSharpCompletionSourceProvider sourceProvider;
         private ITextBuffer textBuffer;
         private List<Completion> compList;
+        private EnvDTE.DTE dte;
+
+
+        private IntellisenseProviderType intellisenseProviderType
+        {
+          get 
+          {
+             var settings = dte.get_Properties("F# Interactive intellisense", "Settings");
+             IntellisenseProviderType intellisenseProviderType = (IntellisenseProviderType)settings.Item("IntellisenseProvider").Value;
+             return intellisenseProviderType;
+          }   
+        }
+
 
         public FSharpCompletionSource(FSharpCompletionSourceProvider sourceProvider, ITextBuffer textBuffer)
         {
             this.sourceProvider = sourceProvider;
+            this.dte = this.sourceProvider.ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
             this.textBuffer = textBuffer;
         }
 
@@ -69,7 +83,6 @@ namespace FSharp.Interactive.Intellisense
 
             AutocompleteService autocomplteService = AutocompleteClient.GetAutocompleteService();
             IEnumerable<StatementCompletion> completions = new List<StatementCompletion>();
-            IntellisenseProviderType intellisenseProviderType = IntellisenseProviderType.Combined;
             if (autocomplteService != null)
             {
                 try

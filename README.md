@@ -3,6 +3,8 @@ Experimental implementation of Intellisense support for F# interactive in Visual
 In order to install it, just build solution, and then run FSharp.Interactive.Intellisense.vsix file generated under
 FSharp.Interactive.Intellisense\FSharp.Interactive.Intellisense\bin\Release.
 
+Or install latest version from GitHub Releases.
+
 Settings are available under Tools -> Options -> F# Interactive Intellisense.
 
 Demo:

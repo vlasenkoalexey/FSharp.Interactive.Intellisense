@@ -11,4 +11,4 @@ Demo:
 
 ![alt text](https://raw.githubusercontent.com/vlasenkoalexey/FSharp.Interactive.Intellisense/master/Demo.png "FSI Intellisense demo")
 
-
+Project description: http://alekseyv-dev.blogspot.com/2015/10/implementing-f-interactive-intellisense.html

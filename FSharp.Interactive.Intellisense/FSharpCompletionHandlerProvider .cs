@@ -14,9 +14,11 @@ using System.Threading.Tasks;
 namespace FSharp.Interactive.Intellisense
 {
     [Export(typeof(IVsTextViewCreationListener))]
+    [Export(typeof(FSharpCompletionHandlerProvider))]
     [Name("F# completion")]
-    [ContentType("any")] // F# and FSharpInteractive do not work here.
+    [ContentType("text")] // F# and FSharpInteractive do not work here.
     [TextViewRole(PredefinedTextViewRoles.Interactive)]
+    // [Order(Before = PredefinedCompletionProviderNames.Keyword)] - investigate this
     internal class FSharpCompletionHandlerProvider : IVsTextViewCreationListener
     {
         [Import]
@@ -27,6 +29,8 @@ namespace FSharp.Interactive.Intellisense
         internal SVsServiceProvider ServiceProvider { get; set; }
         [Import]
         internal IContentTypeRegistryService ContentTypeRegistryService { get; set; }
+
+        public ITextView TextView { get; private set; }
 
         public void VsTextViewCreated(IVsTextView textViewAdapter)
         {
@@ -41,6 +45,8 @@ namespace FSharp.Interactive.Intellisense
             {
                 return; // I didn't find a btter way to figure out if this IVsTextView is indeed F# interactive.
             }
+
+            this.TextView = textView;
 
             FsiLanguageServiceHelper fsiLanguageServiceHelper = new FsiLanguageServiceHelper();
             fsiLanguageServiceHelper.StartRegisterAutocompleteWatchdogLoop();

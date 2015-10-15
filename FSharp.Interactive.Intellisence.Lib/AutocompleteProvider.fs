@@ -75,7 +75,6 @@ module AutocompleteProvider =
     let getVariableNames(fsiAssembly:Assembly) =
         fsiAssembly.GetTypes()//FSI types have the name pattern FSI_####, where #### is the order in which they were created
         |> Seq.filter (fun ty -> ty.Name.StartsWith("FSI_"))
-        |> Seq.sortBy (fun ty -> ty.Name.Split('_').[1] |> int)
         |> Seq.collect (fun ty -> getPropertyInfosForType(ty))
         |> Seq.map (fun pi -> pi.Name)
         |> Seq.distinct
@@ -83,7 +82,6 @@ module AutocompleteProvider =
     let getVariableTypeByName(fsiAssembly:Assembly, name:String) =
         fsiAssembly.GetTypes()//FSI types have the name pattern FSI_####, where #### is the order in which they were created
         |> Seq.filter (fun ty -> ty.Name.StartsWith("FSI_"))
-        |> Seq.sortBy (fun ty -> ty.Name.Split('_').[1] |> int)
         |> Seq.collect (fun ty -> getPropertyInfosForType(ty))
         |> Seq.tryFind (fun pi -> pi.Name.Equals(name, StringComparison.Ordinal))
         |> Option.map (fun pi -> pi.PropertyType)

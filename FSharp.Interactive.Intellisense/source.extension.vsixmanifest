@@ -6,7 +6,8 @@
     <Description xml:space="preserve">Basic intellisense support for F# Interactive</Description>
   </Metadata>
   <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="12.0" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[12.0,15.0)" />
+    <InstallationTarget Version="[12.0,15.0)" Id="Microsoft.VisualStudio.Enterprise" />
   </Installation>
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="4.5" />

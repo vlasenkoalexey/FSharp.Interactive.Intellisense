@@ -28,7 +28,8 @@ namespace FSharp.Interactive.Intellisense
 
         public FsiLanguageServiceHelper()
         {
-            fsiAssembly = Assembly.Load("FSharp.VS.FSI, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            EnvDTE.DTE dte = (EnvDTE.DTE)Package.GetGlobalService(typeof(EnvDTE.DTE));
+            fsiAssembly = Assembly.Load(String.Format("FSharp.VS.FSI, Version={0}.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", dte.Version));
             fsiLanguageServiceType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.FsiLanguageService");
             sessionsType = fsiAssembly.GetType("Microsoft.VisualStudio.FSharp.Interactive.Session.Sessions");
             fsiWindowType = fsiAssembly.GetType(FsiToolWindowClassName);
